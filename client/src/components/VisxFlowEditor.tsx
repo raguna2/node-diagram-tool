@@ -1,9 +1,9 @@
 import { Group } from '@visx/group';
-import { Graph } from '@visx/network';
-import { curveBasis } from '@visx/curve';
-import { LinkHorizontal } from '@visx/shape';
+import { LinePath } from '@visx/shape';
+import { curveBundle } from '@visx/curve';
 import Header from '@/components/Header';
 import { useState } from 'react';
+import { Database } from 'lucide-react';
 
 interface Node {
   x: number;
@@ -18,7 +18,7 @@ interface Edge {
   target: Node;
 }
 
-// initialNodesから初期ノードを生成
+// 初期ノードの定義
 const nodes: Node[] = [
   { id: '1', x: 150, y: 50, label: 'contact_relation', description: '' },
   { id: '2', x: 400, y: 50, label: 'visit_card', description: '' },
@@ -27,7 +27,7 @@ const nodes: Node[] = [
   { id: '5', x: 400, y: 350, label: 'lbc', description: '' },
 ];
 
-// 初期エッジを定義
+// 初期エッジの定義
 const edges: Edge[] = [
   { source: nodes[0], target: nodes[1] },  // contact_relation -> visit_card
   { source: nodes[0], target: nodes[2] },  // contact_relation -> contact
@@ -51,57 +51,61 @@ export default function VisxFlowEditor() {
         <div className="flex-1 h-full relative">
           <svg width={width} height={height}>
             <Group>
-              <Graph
-                nodes={nodes}
-                links={edges}
-                linkComponent={({ link }) => (
-                  <LinkHorizontal
-                    data={link}
+              {/* エッジの描画 */}
+              {edges.map((edge, i) => (
+                <LinePath
+                  key={`edge-${i}`}
+                  data={[
+                    { x: edge.source.x, y: edge.source.y },
+                    { x: edge.target.x, y: edge.target.y }
+                  ]}
+                  x={d => d.x}
+                  y={d => d.y}
+                  stroke="#000066"
+                  strokeWidth={2}
+                  strokeDasharray="5,5"
+                  curve={curveBundle}
+                />
+              ))}
+              {/* ノードの描画 */}
+              {nodes.map((node) => (
+                <Group key={node.id} top={node.y} left={node.x}>
+                  {/* 円の背景 */}
+                  <circle
+                    r={40}
+                    fill="white"
                     stroke="#000066"
                     strokeWidth={2}
-                    fill="none"
-                    strokeDasharray="5,5"
-                    curve={curveBasis}
-                  />
-                )}
-                nodeComponent={({ node }) => (
-                  <g
-                    transform={`translate(${node.x},${node.y})`}
                     onClick={() => handleNodeClick(node)}
-                    cursor="pointer"
-                  >
-                    <circle
-                      r={40}
-                      fill="white"
-                      stroke="#000066"
-                      strokeWidth={2}
-                    />
+                    style={{ cursor: 'pointer' }}
+                  />
+                  {/* データベースアイコン */}
+                  <g transform="translate(-15,-15)">
                     <rect
-                      x={-15}
-                      y={-15}
                       width={30}
                       height={30}
                       fill="#000066"
                       rx={2}
                     />
                     <rect
-                      x={-12}
-                      y={-12}
+                      x={3}
+                      y={3}
                       width={24}
                       height={6}
                       fill="white"
                       rx={1}
                     />
-                    <text
-                      y={50}
-                      textAnchor="middle"
-                      className="text-xs text-[#000066] font-medium"
-                    >
-                      {node.label}
-                    </text>
                   </g>
-                )}
-              />
+                  {/* ラベル */}
+                  <text
+                    y={50}
+                    textAnchor="middle"
+                    className="text-xs text-[#000066] font-medium"
+                  >
+                    {node.label}
+                  </text>
+                </Group>
+              ))}
             </Group>
           </svg>
         </div>
