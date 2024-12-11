@@ -6,10 +6,10 @@ export default function Header() {
   return (
     <header className="h-12 border-b border-border flex items-center px-4 bg-[#2C2C2C]">
       <div className="w-48 flex items-center">
-        <span className="text-lg font-semibold">Jigg</span>
+        <span className="text-lg font-semibold text-[#BBBBBB]">Jigg</span>
       </div>
       <div className="flex-1 flex justify-center">
-        <div className="w-[480px] flex items-center bg-muted rounded">
+        <div className="w-[480px] flex items-center bg-[#1A1A1A] rounded">
           <Search className="h-4 w-4 text-muted-foreground mx-2" />
           <Input
             type="text"
