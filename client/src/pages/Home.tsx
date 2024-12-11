@@ -34,17 +34,31 @@ export default function Home() {
           </Button>
         </Link>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {mockDiagrams.map((diagram) => (
           <Link key={diagram.id} href={`/editor/${diagram.id}`}>
-            <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer">
-              <h3 className="font-medium mb-2">{diagram.title}</h3>
-              <p className="text-sm text-muted-foreground">
-                最終更新: {diagram.updatedAt}
-              </p>
+            <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer">
+              <div className="aspect-[4/3] bg-muted flex items-center justify-center">
+                {/* サムネイル画像のプレースホルダー */}
+                <div className="text-muted-foreground">プレビュー</div>
+              </div>
+              <div className="p-4">
+                <h3 className="font-medium text-lg mb-1">{diagram.title}</h3>
+                <p className="text-sm text-muted-foreground">
+                  最終更新: {diagram.updatedAt}
+                </p>
+              </div>
             </Card>
           </Link>
         ))}
+        <Link href="/editor">
+          <Card className="aspect-[4/3] flex items-center justify-center hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed">
+            <div className="text-center">
+              <Plus className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <span className="text-muted-foreground">新規作成</span>
+            </div>
+          </Card>
+        </Link>
       </div>
     </div>
   );
