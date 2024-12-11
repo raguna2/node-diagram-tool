@@ -20,19 +20,19 @@ export default function DescriptionPanel({
   if (!node) return null;
 
   return (
-    <Card className="w-64 p-4 m-4 bg-muted">
+    <Card className="w-64 p-4 m-4 bg-[#2C2C2C] border-[#47FFDE]">
       <div className="space-y-4">
         <div>
-          <Label>ノード名</Label>
-          <div className="text-sm font-medium">{node.data.label}</div>
+          <Label className="text-[#BBBBBB]">ノード名</Label>
+          <div className="text-sm font-medium text-[#BBBBBB]">{node.data.label}</div>
         </div>
         <div>
-          <Label htmlFor="description">説明</Label>
+          <Label htmlFor="description" className="text-[#BBBBBB]">説明</Label>
           <Textarea
             id="description"
             value={node.data.description}
             onChange={(e) => onDescriptionChange(e.target.value)}
-            className="mt-1"
+            className="mt-1 bg-[#49484D] border-[#47FFDE] text-[#BBBBBB] placeholder:text-[#BBBBBB]"
             placeholder="ノードの説明を入力..."
           />
         </div>
