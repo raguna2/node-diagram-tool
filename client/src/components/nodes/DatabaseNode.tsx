@@ -14,7 +14,7 @@ export const DatabaseNode = memo(({ data, selected }: NodeProps<NodeData>) => {
       className={cn(
         "w-[80px] h-[80px] relative",
         "flex items-center justify-center",
-        "transform transition-all duration-200 ease-in-out",
+        "transform transition-transform duration-150 ease-out will-change-transform",
         selected ? "ring-2 ring-[#47FFDE]" : ""
       )}
     >

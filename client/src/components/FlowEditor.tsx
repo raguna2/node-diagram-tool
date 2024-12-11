@@ -94,9 +94,13 @@ export default function FlowEditor() {
             nodeDragThreshold={1}
             proOptions={{ hideAttribution: true }}
             style={{ 
-              transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-              touchAction: 'none'
+              transition: 'transform 150ms ease-out',
+              touchAction: 'none',
+              willChange: 'transform'
             }}
+            panOnDrag={true}
+            translateExtent={[[-1000, -1000], [1000, 1000]]}
+            preventScrolling={true}
           >
             <Background color="#f0f0f0" gap={20} />
             <Controls />
