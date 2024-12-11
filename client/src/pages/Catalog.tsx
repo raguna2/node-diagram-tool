@@ -8,7 +8,7 @@ export default function Catalog() {
       <Header />
       <div className="flex flex-1">
         <AppSidebar />
-        <main className="flex-1 bg-background">
+        <main className="flex-1 bg-background overflow-y-auto">
           <div className="p-4">
             <div className="text-sm text-muted-foreground mb-4">
               <Link href="/">Home</Link>
