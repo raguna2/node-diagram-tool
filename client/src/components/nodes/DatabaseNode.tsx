@@ -3,28 +3,44 @@ import { Handle, Position, NodeProps } from 'reactflow';
 import { Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export const DatabaseNode = memo(({ data, selected }: NodeProps) => {
+interface NodeData {
+  label: string;
+  description: string;
+}
+
+export const DatabaseNode = memo(({ data, selected }: NodeProps<NodeData>) => {
   return (
     <div
       className={cn(
-        "min-w-[150px] px-4 py-3 shadow-md rounded-lg",
-        "bg-white border-2 border-blue-600",
+        "w-[48px] h-[48px] relative",
+        "flex items-center justify-center",
         selected ? "ring-2 ring-blue-400" : ""
       )}
     >
-      <div className="flex items-center justify-center">
-        <Database className="h-5 w-5 text-blue-500 mr-2" />
-        <div className="text-sm font-medium text-gray-700">{data.label}</div>
+      <div className="absolute inset-0 rounded-full border-2 border-blue-600 bg-white" />
+      <Database className="h-6 w-6 text-blue-500" />
+      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-xs whitespace-nowrap">
+        {data.label}
       </div>
       <Handle
         type="target"
         position={Position.Top}
-        style={{ background: '#3b82f6', width: '8px', height: '8px' }}
+        className="w-3 h-3 border-2 bg-white"
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{ background: '#3b82f6', width: '8px', height: '8px' }}
+        className="w-3 h-3 border-2 bg-white"
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-3 h-3 border-2 bg-white"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-3 h-3 border-2 bg-white"
       />
     </div>
   );

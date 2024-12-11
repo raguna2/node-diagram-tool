@@ -3,8 +3,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Node } from 'reactflow';
 
+interface NodeData {
+  label: string;
+  description: string;
+}
+
 interface DescriptionPanelProps {
-  node: Node | null;
+  node: Node<NodeData> | null;
   onDescriptionChange: (description: string) => void;
 }
 
