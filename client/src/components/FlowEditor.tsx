@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
 import ReactFlow, {
+  Node,
+  Edge,
   addEdge,
   Background,
   Controls,
   Connection,
-  Edge,
-  Node,
   useEdgesState,
   useNodesState,
   ConnectionMode,
@@ -24,6 +24,10 @@ export default function FlowEditor() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+
+  if (!nodes || !edges) {
+    return null;
+  }
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
