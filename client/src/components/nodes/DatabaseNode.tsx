@@ -25,14 +25,13 @@ export const DatabaseNode = memo(({ data, selected }: NodeProps<NodeData>) => {
       <Handle
         type="target"
         position={Position.Top}
-        className="w-2 h-2 border-2 border-[#000066] bg-white"
+        className="opacity-0 w-2 h-2"
       />
       <Handle
         type="source"
         position={Position.Bottom}
-        className="w-2 h-2 border-2 border-[#000066] bg-white"
+        className="opacity-0 w-2 h-2"
       />
-      
     </div>
   );
 });

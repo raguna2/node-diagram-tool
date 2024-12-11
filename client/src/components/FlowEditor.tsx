@@ -76,6 +76,9 @@ export default function FlowEditor() {
             fitView
             snapToGrid
             snapGrid={[15, 15]}
+            selectNodesOnDrag
+            multiSelectionKeyCode="Shift"
+            selectionOnDrag
           >
             <Background color="#f0f0f0" gap={20} />
             <Controls />
