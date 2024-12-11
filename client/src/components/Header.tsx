@@ -9,12 +9,12 @@ export default function Header() {
         <span className="text-lg font-semibold text-[#BBBBBB]">Jigg</span>
       </div>
       <div className="flex-1 flex justify-center">
-        <div className="w-[480px] flex items-center bg-[#1A1A1A] rounded-md">
+        <div className="w-[689px] flex items-center bg-[#49484D] rounded-md">
           <Search className="h-4 w-4 text-[#BBBBBB] mx-3" />
           <Input
             type="text"
             placeholder="Search table, columns, and descriptions"
-            className="flex-1 h-10 bg-transparent border-none text-[#BBBBBB] placeholder:text-[#BBBBBB] text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="flex-1 h-[38px] bg-transparent border-none text-[#BBBBBB] placeholder:text-[#BBBBBB] text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
       </div>
