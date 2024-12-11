@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Group } from '@visx/group';
-import { hierarchy, Tree } from '@visx/hierarchy';
+import { hierarchy } from '@visx/hierarchy';
 import { LinkHorizontal } from '@visx/shape';
+import { tree as d3tree } from 'd3-hierarchy';
 import { Database } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import DescriptionPanel from '@/components/DescriptionPanel';
@@ -43,16 +44,22 @@ export default function FlowEditor() {
   const yMax = height - defaultMargin.top - defaultMargin.bottom;
   const xMax = width - defaultMargin.left - defaultMargin.right;
 
+  // 階層構造を作成
   const root = hierarchy(data);
-  const tree = Tree<TreeNode>({
-    root,
-    nodeSize: [yMax / (root.height + 1), xMax / (root.height + 1)],
-  });
-  const links = tree.links();
-  const nodes = tree.descendants();
+  
+  // treeレイアウトを作成
+  const treeLayout = d3tree<TreeNode>()
+    .size([yMax, xMax]);
+  
+  // レイアウトを計算
+  const treeData = treeLayout(root);
+  
+  // リンクとノードを取得
+  const links = treeData.links();
+  const nodes = treeData.descendants();
 
-  const onNodeClick = (node: TreeNode) => {
-    setSelectedNode(node);
+  const onNodeClick = (node: any) => {
+    setSelectedNode(node.data);
   };
 
   return (
@@ -75,7 +82,7 @@ export default function FlowEditor() {
                 key={i}
                 top={node.x}
                 left={node.y}
-                onClick={() => onNodeClick(node.data)}
+                onClick={() => onNodeClick(node)}
               >
                 <circle
                   r={20}
