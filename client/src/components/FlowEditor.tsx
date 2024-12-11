@@ -93,7 +93,10 @@ export default function FlowEditor() {
             nodesDraggable
             nodeDragThreshold={1}
             proOptions={{ hideAttribution: true }}
-            style={{ transition: 'transform 0.1s ease' }}
+            style={{ 
+              transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              touchAction: 'none'
+            }}
           >
             <Background color="#f0f0f0" gap={20} />
             <Controls />
