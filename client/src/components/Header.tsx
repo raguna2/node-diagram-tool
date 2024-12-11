@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export default function Header() {
   return (
-    <header className="h-12 border-b border-border flex items-center px-4 bg-background">
+    <header className="h-12 border-b border-border flex items-center px-4 bg-[#2C2C2C]">
       <div className="w-48 flex items-center">
         <span className="text-lg font-semibold">Jigg</span>
       </div>
