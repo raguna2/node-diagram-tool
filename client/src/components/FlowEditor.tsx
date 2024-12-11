@@ -20,6 +20,13 @@ const nodeTypes = {
   database: DatabaseNode,
 };
 
+const defaultEdgeOptions = {
+  type: 'smoothstep',
+  markerEnd: { type: MarkerType.ArrowClosed },
+  style: { stroke: '#000066', strokeDasharray: '5 5' },
+  animated: true,
+};
+
 interface NodeData {
   label: string;
   description: string;
@@ -73,12 +80,16 @@ export default function FlowEditor() {
             onConnect={onConnect}
             onNodeClick={onNodeClick}
             nodeTypes={nodeTypes}
+            defaultEdgeOptions={defaultEdgeOptions}
             fitView
             snapToGrid
             snapGrid={[15, 15]}
             selectNodesOnDrag
             multiSelectionKeyCode="Shift"
             selectionOnDrag
+            deleteKeyCode="Delete"
+            minZoom={0.5}
+            maxZoom={2}
           >
             <Background color="#f0f0f0" gap={20} />
             <Controls />
