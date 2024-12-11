@@ -25,20 +25,7 @@ interface NodeData {
   description: string;
 }
 
-const initialNodes: Node<NodeData>[] = [
-  {
-    id: '1',
-    type: 'database',
-    position: { x: 250, y: 100 },
-    data: { label: 'テーブル1', description: '' },
-  },
-  {
-    id: '2',
-    type: 'database',
-    position: { x: 250, y: 300 },
-    data: { label: 'テーブル2', description: '' },
-  },
-];
+import { initialNodes } from '@/lib/initialNodes';
 
 export default function FlowEditor() {
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>(initialNodes);
