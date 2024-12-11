@@ -8,8 +8,8 @@ export default function Header() {
       <div className="w-48 flex items-center">
         <span className="text-lg font-semibold text-[#BBBBBB]">Jigg</span>
       </div>
-      <div className="flex-1 flex justify-center items-center">
-        <div className="w-[689px] h-[38px] flex items-center bg-[#49484D] rounded-md">
+      <div className="flex-1 flex justify-center">
+        <div className="w-[689px] h-[38px] flex items-center bg-[#49484D] rounded-md my-[13px]">
           <Search className="h-4 w-4 text-[#BBBBBB] mx-3" />
           <Input
             type="text"
