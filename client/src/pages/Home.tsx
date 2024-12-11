@@ -34,10 +34,10 @@ const mockDiagrams: DiagramCard[] = [
 
 export default function Home() {
   return (
-    <div className="flex">
-      <AppSidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
+    <div className="flex flex-col h-screen">
+      <Header />
+      <div className="flex flex-1">
+        <AppSidebar />
         <main className="flex-1 bg-background">
           <div className="p-4">
             <div className="text-sm text-muted-foreground mb-4">
