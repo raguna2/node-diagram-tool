@@ -8,11 +8,11 @@ export default function AppSidebar() {
         <Menu className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors cursor-pointer" />
       </div>
       <nav>
-        <Link href="/">
-          <a className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-accent transition-colors">
+        <div className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-accent transition-colors">
+          <Link href="/">
             <Book className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
-          </a>
-        </Link>
+          </Link>
+        </div>
       </nav>
     </aside>
   );
