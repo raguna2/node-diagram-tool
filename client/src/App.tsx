@@ -1,7 +1,8 @@
 import { Switch, Route } from "wouter";
 import Home from "@/pages/Home";
-import D3FlowEditor from "@/components/D3FlowEditor";
+import FlowEditor from "@/components/FlowEditor";
 import Catalog from "@/pages/Catalog";
+import { ReactFlowProvider } from 'reactflow';
 
 function App() {
   return (
@@ -9,11 +10,15 @@ function App() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/editor">
-            <D3FlowEditor />
-          </Route>
-          <Route path="/editor/:id">
-            <D3FlowEditor />
-          </Route>
+          <ReactFlowProvider>
+            <FlowEditor />
+          </ReactFlowProvider>
+        </Route>
+        <Route path="/editor/:id">
+          <ReactFlowProvider>
+            <FlowEditor />
+          </ReactFlowProvider>
+        </Route>
         <Route path="/catalog" component={Catalog} />
         <Route>404 Page Not Found</Route>
       </Switch>
