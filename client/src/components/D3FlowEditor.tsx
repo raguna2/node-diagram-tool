@@ -16,9 +16,19 @@ interface Edge {
   target: string;
 }
 
+import { initialNodes } from '@/lib/initialNodes';
+
 export default function D3FlowEditor() {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [nodes, setNodes] = useState<Node[]>([]);
+  const [nodes, setNodes] = useState<Node[]>(
+    initialNodes.map(node => ({
+      id: node.id,
+      x: node.position.x,
+      y: node.position.y,
+      label: node.data.label,
+      description: node.data.description
+    }))
+  );
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
@@ -67,10 +77,25 @@ export default function D3FlowEditor() {
         .style('align-items', 'center')
         .style('justify-content', 'center');
 
-      // Lucideアイコンのレンダリング
-      const icon = document.createElement('div');
-      icon.innerHTML = Database({ className: 'h-10 w-10 text-[#000066]' }).outerHTML;
-      div.node().appendChild(icon);
+      // SVGでデータベースアイコンを描画
+      const iconGroup = group.append('g')
+        .attr('transform', 'translate(0,0)');
+      
+      iconGroup.append('rect')
+        .attr('x', -15)
+        .attr('y', -15)
+        .attr('width', 30)
+        .attr('height', 30)
+        .attr('fill', '#000066')
+        .attr('rx', 2);
+      
+      iconGroup.append('rect')
+        .attr('x', -12)
+        .attr('y', -12)
+        .attr('width', 24)
+        .attr('height', 6)
+        .attr('fill', 'white')
+        .attr('rx', 1);
     });
 
     // ラベルの描画
@@ -88,11 +113,11 @@ export default function D3FlowEditor() {
 
     nodeGroups.call(drag as any);
 
-    function dragstarted(event: any, d: Node) {
+    function dragstarted(this: SVGGElement, event: any, d: Node) {
       d3.select(this).raise().classed('active', true);
     }
 
-    function dragged(event: any, d: Node) {
+    function dragged(this: SVGGElement, event: any, d: Node) {
       d3.select(this)
         .attr('transform', `translate(${event.x},${event.y})`);
       d.x = event.x;
@@ -100,9 +125,9 @@ export default function D3FlowEditor() {
       updateEdges();
     }
 
-    function dragended(event: any, d: Node) {
+    function dragended(this: SVGGElement, event: any, d: Node) {
       d3.select(this).classed('active', false);
-      setNodes(nodes.map(node => 
+      setNodes(prevNodes => prevNodes.map(node => 
         node.id === d.id ? { ...node, x: event.x, y: event.y } : node
       ));
     }
