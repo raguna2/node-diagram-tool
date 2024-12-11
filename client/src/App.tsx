@@ -5,7 +5,7 @@ import { ReactFlowProvider } from 'reactflow';
 
 function App() {
   return (
-    <div className="min-h-screen w-screen bg-background text-foreground">
+    <div className="h-screen w-screen bg-background text-foreground overflow-hidden">
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/editor">
