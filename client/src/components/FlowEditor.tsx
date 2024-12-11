@@ -52,7 +52,7 @@ export default function FlowEditor() {
         id: `e${eds.length + 1}`,
         type: 'smoothstep',
         markerEnd: { type: MarkerType.ArrowClosed },
-        style: { stroke: '#47FFDE' },
+        style: { stroke: '#1a365d', strokeDasharray: '5 5' },
       } as Edge)
     );
   }, []);
@@ -74,7 +74,7 @@ export default function FlowEditor() {
   }, [selectedNode, setNodes]);
 
   return (
-    <div className="flex flex-col h-screen bg-[#2C2C2C]">
+    <div className="flex flex-col h-screen bg-white">
       <Header />
       <div className="flex flex-1">
         <div className="flex-1 h-full">
@@ -90,7 +90,7 @@ export default function FlowEditor() {
             snapToGrid
             snapGrid={[15, 15]}
           >
-            <Background color="#BBBBBB" />
+            <Background color="#f0f0f0" gap={20} />
             <Controls />
           </ReactFlow>
         </div>
