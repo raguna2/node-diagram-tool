@@ -90,6 +90,10 @@ export default function FlowEditor() {
             deleteKeyCode="Delete"
             minZoom={0.5}
             maxZoom={2}
+            nodesDraggable
+            nodeDragThreshold={1}
+            proOptions={{ hideAttribution: true }}
+            style={{ transition: 'transform 0.1s ease' }}
           >
             <Background color="#f0f0f0" gap={20} />
             <Controls />
