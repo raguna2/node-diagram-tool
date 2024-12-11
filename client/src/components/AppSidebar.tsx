@@ -8,7 +8,7 @@ export default function AppSidebar() {
 
   return (
     <aside className="w-16 h-screen bg-muted border-r border-border flex flex-col items-center py-4">
-      <div className="space-y-6">
+      <div className="space-y-2">
         <Link href="/">
           <div className={`w-16 h-14 relative flex justify-center group ${isNodesPage ? 'before:absolute before:left-0 before:top-0 before:h-full before:w-0.5 before:bg-[#47FFDE]' : ''}`}>
             <div className="flex flex-col items-center justify-center cursor-pointer">
