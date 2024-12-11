@@ -7,28 +7,34 @@ import Header from "@/components/Header";
 interface DiagramCard {
   id: string;
   title: string;
+  description: string;
 }
 
 const mockDiagrams: DiagramCard[] = [
   {
     id: "1",
     title: "データモデル1",
+    description: "ユーザー管理システムのERD図です。",
   },
   {
     id: "2",
-    title: "データモデル1",
+    title: "データモデル2",
+    description: "商品管理システムのデータベース設計図です。",
   },
   {
     id: "3",
-    title: "データモデル1",
+    title: "データモデル3",
+    description: "注文管理システムのテーブル設計です。",
   },
   {
     id: "4",
-    title: "データモデル1",
+    title: "データモデル4",
+    description: "在庫管理システムのERD図です。",
   },
   {
     id: "5",
-    title: "データモデル1",
+    title: "データモデル5",
+    description: "会員管理システムのデータベース設計図です。",
   },
 ];
 
@@ -49,19 +55,22 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {mockDiagrams.map((diagram) => (
                 <Link key={diagram.id} href={`/editor/${diagram.id}`}>
-                  <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer">
-                    <div className="aspect-[4/3] bg-muted flex items-center justify-center">
-                      {/* サムネイル画像のプレースホルダー */}
-                      <div className="text-muted-foreground">Preview</div>
-                    </div>
+                  <Card className="w-[400px] overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer">
                     <div className="p-4">
-                      <h3 className="font-medium">{diagram.title}</h3>
+                      <h3 className="text-lg font-medium mb-4">{diagram.title}</h3>
+                      <div className="aspect-[4/3] bg-muted flex items-center justify-center mb-4">
+                        {/* サムネイル画像のプレースホルダー */}
+                        <div className="text-muted-foreground">Preview</div>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        このダイアグラムの説明文がここに入ります。
+                      </p>
                     </div>
                   </Card>
                 </Link>
               ))}
               <Link href="/editor">
-                <Card className="aspect-[4/3] flex items-center justify-center hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed">
+                <Card className="w-[400px] h-[400px] flex items-center justify-center hover:shadow-lg transition-all duration-300 cursor-pointer border-dashed">
                   <div className="text-center">
                     <Plus className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                     <span className="text-muted-foreground">Create New</span>
