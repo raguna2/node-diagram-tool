@@ -80,22 +80,11 @@ export default function VisxFlowEditor() {
                     style={{ cursor: 'pointer' }}
                   />
                   {/* データベースアイコン */}
-                  <g transform="translate(-15,-15)">
-                    <rect
-                      width={30}
-                      height={30}
-                      fill="#000066"
-                      rx={2}
-                    />
-                    <rect
-                      x={3}
-                      y={3}
-                      width={24}
-                      height={6}
-                      fill="white"
-                      rx={1}
-                    />
-                  </g>
+                  <foreignObject width={40} height={40} x={-20} y={-20}>
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Database className="h-10 w-10 text-[#000066] z-10" />
+                    </div>
+                  </foreignObject>
                   {/* ラベル */}
                   <text
                     y={50}
