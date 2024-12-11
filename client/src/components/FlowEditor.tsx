@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Group } from '@visx/group';
 import { hierarchy } from '@visx/hierarchy';
 import { LinkHorizontal } from '@visx/shape';
@@ -6,6 +6,16 @@ import { tree as d3tree } from 'd3-hierarchy';
 import { Database } from 'lucide-react';
 import Sidebar from '@/components/Sidebar';
 import DescriptionPanel from '@/components/DescriptionPanel';
+
+interface NodePosition {
+  x: number;
+  y: number;
+}
+
+interface DraggedNode {
+  id: string;
+  position: NodePosition;
+}
 
 interface TreeNode {
   name: string;
@@ -38,9 +48,34 @@ const defaultMargin = { top: 40, left: 40, right: 40, bottom: 40 };
 export default function FlowEditor() {
   const [data] = useState<TreeNode>(initialData);
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
+  const [draggedNodes, setDraggedNodes] = useState<{ [key: string]: NodePosition }>({});
+  const [isDragging, setIsDragging] = useState(false);
 
   const width = 1200;
   const height = 800;
+
+  const handleDragStart = useCallback((event: React.MouseEvent, nodeId: string) => {
+    setIsDragging(true);
+    event.stopPropagation();
+  }, []);
+
+  const handleDrag = useCallback((event: React.MouseEvent, nodeId: string, originalX: number, originalY: number) => {
+    if (!isDragging) return;
+    
+    const newX = originalX + event.movementX;
+    const newY = originalY + event.movementY;
+    
+    setDraggedNodes(prev => ({
+      ...prev,
+      [nodeId]: { x: newX, y: newY }
+    }));
+    
+    event.stopPropagation();
+  }, [isDragging]);
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
   const yMax = height - defaultMargin.top - defaultMargin.bottom;
   const xMax = width - defaultMargin.left - defaultMargin.right;
 
@@ -80,9 +115,14 @@ export default function FlowEditor() {
             {nodes.map((node, i) => (
               <Group
                 key={i}
-                top={node.x}
-                left={node.y}
+                top={draggedNodes[node.data.name]?.y ?? node.x}
+                left={draggedNodes[node.data.name]?.x ?? node.y}
                 onClick={() => onNodeClick(node)}
+                onMouseDown={(e) => handleDragStart(e, node.data.name)}
+                onMouseMove={(e) => handleDrag(e, node.data.name, node.y, node.x)}
+                onMouseUp={handleDragEnd}
+                onMouseLeave={handleDragEnd}
+                style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
               >
                 <circle
                   r={20}
