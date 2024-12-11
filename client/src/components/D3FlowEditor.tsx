@@ -31,12 +31,43 @@ export default function D3FlowEditor() {
   );
   const [edges, setEdges] = useState<Edge[]>([]);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [dragLine, setDragLine] = useState<{
+    source: string;
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!svgRef.current) return;
 
     const svg = d3.select(svgRef.current);
     const g = svg.append('g');
+    
+    svg.on('mousemove', (event: MouseEvent) => {
+      if (dragLine) {
+        const [x, y] = d3.pointer(event);
+        setDragLine(prev => prev ? { ...prev, x2: x, y2: y } : null);
+      }
+    })
+    .on('mouseup', () => {
+      if (dragLine) {
+        const targetNode = nodes.find(node => {
+          const dx = node.x - dragLine.x2;
+          const dy = node.y - dragLine.y2;
+          return Math.sqrt(dx * dx + dy * dy) < 40; // 40はノードの半径
+        });
+        
+        if (targetNode && targetNode.id !== dragLine.source) {
+          setEdges(prev => [...prev, {
+            source: dragLine.source,
+            target: targetNode.id
+          }]);
+        }
+        setDragLine(null);
+      }
+    });
 
     // ズームの設定
     const zoom = d3.zoom()
@@ -52,7 +83,17 @@ export default function D3FlowEditor() {
       .data(nodes, (d: any) => d.id)
       .join('g')
       .attr('class', 'node')
-      .attr('transform', (d) => `translate(${d.x},${d.y})`);
+      .attr('transform', (d) => `translate(${d.x},${d.y})`)
+      .on('mousedown', function(event: MouseEvent, d: Node) {
+        const [x, y] = d3.pointer(event, svg.node());
+        setDragLine({
+          source: d.id,
+          x1: d.x,
+          y1: d.y,
+          x2: x,
+          y2: y
+        });
+      });
 
     // ノードの円の描画
     nodeGroups.append('circle')
@@ -164,10 +205,24 @@ export default function D3FlowEditor() {
 
     updateEdges();
 
+    // ドラッグライン描画
+    if (dragLine) {
+      g.selectAll('.drag-line').remove();
+      g.append('path')
+        .attr('class', 'drag-line')
+        .attr('d', `M${dragLine.x1},${dragLine.y1} L${dragLine.x2},${dragLine.y2}`)
+        .attr('stroke', '#000066')
+        .attr('stroke-width', 2)
+        .attr('fill', 'none')
+        .attr('stroke-dasharray', '5,5');
+    } else {
+      g.selectAll('.drag-line').remove();
+    }
+
     return () => {
       svg.selectAll('*').remove();
     };
-  }, [nodes, edges]);
+  }, [nodes, edges, dragLine]);
 
   return (
     <div className="flex flex-col h-screen bg-white">
