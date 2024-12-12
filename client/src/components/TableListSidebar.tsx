@@ -1,8 +1,11 @@
-import { Database } from 'lucide-react';
+import { Database, Menu } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { sampleData } from "@/lib/sampleData";
 import { useState } from 'react';
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface TableListSidebarProps {
   onTableSelect?: (tableId: string) => void;
@@ -11,12 +14,14 @@ interface TableListSidebarProps {
 
 export default function TableListSidebar({ onTableSelect, selectedNode }: TableListSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   const tables = sampleData.nodes.filter(node => 
     node.table.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  return (
+  const TableList = () => (
     <div className="w-64 h-full bg-[#2C2C2C] border-r border-[#47FFDE] flex flex-col">
       <div className="p-4 border-b border-[#47FFDE]/20">
         <h2 className="text-[#BBBBBB] font-medium text-sm uppercase tracking-wider mb-3">テーブル一覧</h2>
@@ -48,7 +53,10 @@ export default function TableListSidebar({ onTableSelect, selectedNode }: TableL
           {tables.map((table) => (
             <button
               key={table.id}
-              onClick={() => onTableSelect?.(table.id)}
+              onClick={() => {
+                onTableSelect?.(table.id);
+                if (isMobile) setIsOpen(false);
+              }}
               className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-sm transition-all ${
                 selectedNode === table.id
                   ? 'bg-[#47FFDE]/10 text-[#47FFDE] border-l-2 border-[#47FFDE]'
@@ -61,6 +69,31 @@ export default function TableListSidebar({ onTableSelect, selectedNode }: TableL
           ))}
         </div>
       </ScrollArea>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="fixed left-16 top-4 z-50 md:hidden"
+          >
+            <Menu className="h-5 w-5 text-[#BBBBBB]" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="p-0 w-80 bg-[#2C2C2C]">
+          <TableList />
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <div className="hidden md:block">
+      <TableList />
     </div>
   );
 }

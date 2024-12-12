@@ -332,7 +332,7 @@ export default function ForceGraphEditor({
         />
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
-            <div className="flex-1 bg-white relative">
+            <div className="flex-1 bg-white relative min-w-0">
               
               {selectedNode && (
                 <div className="absolute top-4 left-4 z-10">
@@ -385,8 +385,8 @@ export default function ForceGraphEditor({
                 linkCanvasObject={paintLink}
                 linkColor={() => "transparent"}
                 linkDirectionalArrowLength={0}
-                width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
-                height={(window.innerHeight - 64) * 0.7}
+                width={window.innerWidth - (selectedNode && window.innerWidth >= 768 ? window.innerWidth / 3 : 0) - (window.innerWidth >= 768 ? 320 : 64)}
+                height={window.innerWidth >= 768 ? (window.innerHeight - 64) * 0.7 : (window.innerHeight - 64) * 0.6}
                 d3Force={(engine: any) => {
                   engine
                     .force('charge', d3.forceManyBody().strength(charge))
@@ -407,7 +407,7 @@ export default function ForceGraphEditor({
             </div>
             <div 
               className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                selectedNode ? 'w-1/3 border-l border-[#47FFDE]' : 'w-0'
+                selectedNode ? 'md:w-1/3 w-full border-l border-[#47FFDE]' : 'w-0'
               }`}
             >
               <TableSchema node={selectedNode} selectedRowData={selectedRowData} />
@@ -415,7 +415,7 @@ export default function ForceGraphEditor({
           </div>
           <div 
             className={`transition-all duration-300 ease-in-out ${
-              selectedNode ? 'h-[30vh]' : 'h-0'
+              selectedNode ? 'md:h-[30vh] h-[40vh]' : 'h-0'
             } border-t border-[#47FFDE] bg-[#2C2C2C] overflow-hidden`}
           >
             <div className="p-4">
