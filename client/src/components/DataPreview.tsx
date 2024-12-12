@@ -28,7 +28,7 @@ export default function DataPreview({ tableName, onRowSelect, selectedRowData }:
             {columns.map((column) => (
               <TableHead
                 key={column}
-                className="bg-[#2C2C2C] text-[#BBBBBB] whitespace-nowrap"
+                className="bg-gradient-to-b from-[#2C2C2C]/90 to-[#1C1C1C]/90 text-[#47FFDE] whitespace-nowrap backdrop-blur-sm border-b border-white/5"
               >
                 {column}
               </TableHead>
@@ -39,10 +39,10 @@ export default function DataPreview({ tableName, onRowSelect, selectedRowData }:
           {data.map((row, i) => (
             <TableRow 
               key={i} 
-              className={`hover:bg-[#3C3C3C] cursor-pointer ${
+              className={`transition-all cursor-pointer backdrop-blur-sm ${
                 selectedRowData?.id === row.id 
-                  ? 'outline outline-2 outline-[#7B61FF]' 
-                  : ''
+                  ? 'bg-gradient-to-r from-[#47FFDE]/10 to-transparent border border-[#47FFDE]/20 shadow-[inset_0_0_20px_rgba(71,255,222,0.05)]' 
+                  : 'hover:bg-white/5 hover:shadow-lg'
               }`}
               onClick={() => onRowSelect?.(row)}
             >

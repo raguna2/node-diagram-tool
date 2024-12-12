@@ -17,14 +17,14 @@ export default function TableListSidebar({ onTableSelect, selectedNode }: TableL
   );
 
   return (
-    <div className="w-64 h-full bg-[#2C2C2C] border-r border-[#47FFDE] flex flex-col">
-      <div className="p-4 border-b border-[#47FFDE]/20">
-        <h2 className="text-[#BBBBBB] font-medium text-sm uppercase tracking-wider mb-3">テーブル一覧</h2>
+    <div className="w-64 h-full bg-[#2C2C2C]/80 backdrop-blur-xl border-r border-white/10 flex flex-col shadow-2xl">
+      <div className="p-4 border-b border-white/5 bg-gradient-to-b from-[#47FFDE]/5 to-transparent">
+        <h2 className="text-[#47FFDE] font-medium text-sm uppercase tracking-wider mb-3 text-shadow">テーブル一覧</h2>
         <div className="relative">
           <Input
             type="search"
             placeholder="テーブルを検索..."
-            className="bg-[#1C1C1C] border-[#47FFDE]/10 text-[#BBBBBB] placeholder:text-[#666666] h-8 pl-8 text-sm focus:border-[#47FFDE] hover:border-[#47FFDE]/30 transition-all rounded-md"
+            className="bg-[#1C1C1C]/60 border-white/5 text-white placeholder:text-white/40 h-8 pl-8 text-sm focus:border-[#47FFDE] hover:border-[#47FFDE]/30 transition-all rounded-lg shadow-inner backdrop-blur-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -49,10 +49,10 @@ export default function TableListSidebar({ onTableSelect, selectedNode }: TableL
             <button
               key={table.id}
               onClick={() => onTableSelect?.(table.id)}
-              className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-sm transition-all ${
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all ${
                 selectedNode === table.id
-                  ? 'bg-[#47FFDE]/10 text-[#47FFDE] border-l-2 border-[#47FFDE]'
-                  : 'text-[#BBBBBB] hover:bg-[#3C3C3C]/50 border-l-2 border-transparent'
+                  ? 'bg-gradient-to-r from-[#47FFDE]/20 to-[#47FFDE]/5 text-[#47FFDE] shadow-[inset_0_0_10px_rgba(71,255,222,0.1)] backdrop-blur-sm'
+                  : 'text-white/70 hover:bg-white/5 hover:backdrop-blur-sm hover:shadow-lg'
               }`}
             >
               <Database className="h-4 w-4" />

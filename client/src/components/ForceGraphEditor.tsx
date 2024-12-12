@@ -454,22 +454,22 @@ export default function ForceGraphEditor({
 
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-[#1a1a1a] via-[#2C2C2C] to-[#1a1a1a]">
       <Header />
       
       {/* Schema tooltip */}
       {hoveredNode?.tooltip && (
         <div
-          className="fixed z-50 p-6 rounded-xl shadow-2xl transform -translate-x-1/2 -translate-y-1/2"
+          className="fixed z-50 p-6 rounded-xl transform -translate-x-1/2 -translate-y-1/2"
           style={{
             left: '50%',
             top: '50%',
-            backgroundColor: 'rgba(44, 44, 44, 0.75)',
-            backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(71, 255, 222, 0.2)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            backgroundColor: 'rgba(28, 28, 28, 0.85)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 8px 32px rgba(71, 255, 222, 0.1), inset 0 0 32px rgba(71, 255, 222, 0.05)',
             minWidth: '700px',
-            WebkitBackdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(20px)',
           }}
         >
           {hoveredNode.tooltip.content}
@@ -596,10 +596,10 @@ export default function ForceGraphEditor({
           </div>
 
           {/* Data preview area */}
-          <div className="flex-1 border-l border-[#47FFDE] overflow-auto">
+          <div className="flex-1 border-l border-white/10 overflow-auto bg-[#2C2C2C]/80 backdrop-blur-xl">
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-[#BBBBBB]">
+                <h3 className="text-lg font-medium bg-gradient-to-r from-[#47FFDE] to-[#7B61FF] bg-clip-text text-transparent">
                   データプレビュー: {selectedNode?.table || ''}
                 </h3>
                 <Button
