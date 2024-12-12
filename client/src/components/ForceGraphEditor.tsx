@@ -63,10 +63,24 @@ export default function ForceGraphEditor({
     // 同じノードをクリックした場合は何もしない
     if (selectedNode?.id === node.id) return;
     
+    // 新しいノードを選択する前に、現在の選択状態を保持
+    const prevSelectedNode = selectedNode;
+    
     setSelectedNode(node);
     setSelectedRowData(null); // ノードを切り替えた時は選択をリセット
+    
+    // ズームトゥアニメーション
     zoomToNode(node);
-  }, [selectedNode, zoomToNode]);
+    
+    // 前のノードの状態を保持
+    if (prevSelectedNode) {
+      const graphNode = graphData.nodes.find(n => n.id === prevSelectedNode.id);
+      if (graphNode) {
+        graphNode.fx = graphNode.x;
+        graphNode.fy = graphNode.y;
+      }
+    }
+  }, [selectedNode, zoomToNode, graphData.nodes]);
 
   // 選択されたノードの接続先ノードを取得
   const connectedNodes = useMemo(() => {
@@ -168,8 +182,8 @@ export default function ForceGraphEditor({
     const currentZoom = fgRef.current?.zoom() || 1;
     const isZoomedIn = currentZoom > 2;
 
-    // ズームイン時は選択されたノードのみ表示
-    if (isZoomedIn && !isSelected) return;
+    // ズームイン時のみ、選択されていないノードを非表示に
+    if (isZoomedIn && !isSelected && selectedNode) return;
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
