@@ -319,48 +319,124 @@ export default function ForceGraphEditor({
     const time = performance.now() / 1000;
     const dashOffset = time * 15; // Speed of animation
     
-    // Calculate angle for gradient
+    // Calculate angle and distance for curved paths
     const dx = target.x - source.x;
     const dy = target.y - source.y;
-    const angle = Math.atan2(dy, dx);
+    const distance = Math.sqrt(dx * dx + dy * dy);
     
-    // Create gradient
+    // Create control points for curved path
+    const midX = (source.x + target.x) / 2;
+    const midY = (source.y + target.y) / 2;
+    const curvature = 0.3;
+    const cpX = midX - dy * curvature;
+    const cpY = midY + dx * curvature;
+    
+    // Create gradient with relationship-specific colors
     const gradient = ctx.createLinearGradient(source.x, source.y, target.x, target.y);
-    gradient.addColorStop(0, 'rgba(100, 116, 139, 0.4)');
-    gradient.addColorStop(1, 'rgba(100, 116, 139, 0.1)');
+    let startColor, endColor;
     
+    switch (link.relationship) {
+      case "one-to-one":
+        startColor = 'rgba(71, 255, 222, 0.6)';
+        endColor = 'rgba(71, 255, 222, 0.2)';
+        break;
+      case "one-to-many":
+        startColor = 'rgba(123, 97, 255, 0.6)';
+        endColor = 'rgba(123, 97, 255, 0.2)';
+        break;
+      case "many-to-many":
+        startColor = 'rgba(255, 71, 71, 0.6)';
+        endColor = 'rgba(255, 71, 71, 0.2)';
+        break;
+      default:
+        startColor = 'rgba(100, 116, 139, 0.4)';
+        endColor = 'rgba(100, 116, 139, 0.1)';
+    }
+    
+    gradient.addColorStop(0, startColor);
+    gradient.addColorStop(1, endColor);
+    
+    // Draw curved path
     ctx.beginPath();
     ctx.moveTo(source.x, source.y);
-    ctx.lineTo(target.x, target.y);
+    ctx.quadraticCurveTo(cpX, cpY, target.x, target.y);
     
-    // Different patterns based on relationship type
+    // Set line style based on relationship
     switch (link.relationship) {
       case "one-to-one":
         ctx.setLineDash([4, 4]);
-        ctx.lineDashOffset = 0;
-        ctx.lineWidth = 1;
+        ctx.lineDashOffset = dashOffset;
+        ctx.lineWidth = 1.5;
         break;
       case "one-to-many":
-        ctx.setLineDash([6, 3]);
-        ctx.lineDashOffset = -dashOffset;
-        ctx.lineWidth = 1.2;
+        ctx.setLineDash([8, 4]);
+        ctx.lineDashOffset = -dashOffset * 2;
+        ctx.lineWidth = 2;
         break;
       case "many-to-many":
         ctx.setLineDash([3, 3]);
-        ctx.lineDashOffset = Math.sin(time * 2) * 10;
-        ctx.lineWidth = 1.5;
+        ctx.lineDashOffset = Math.sin(time * 3) * 15;
+        ctx.lineWidth = 2.5;
         break;
     }
     
+    // Draw the path with gradient and glow effect
     ctx.strokeStyle = gradient;
     ctx.stroke();
     
-    // Add subtle glow effect
-    ctx.shadowColor = 'rgba(100, 116, 139, 0.2)';
-    ctx.shadowBlur = 3;
+    // Add enhanced glow effect
+    ctx.shadowColor = startColor;
+    ctx.shadowBlur = 8;
+    ctx.globalAlpha = 0.4;
     ctx.stroke();
+    ctx.globalAlpha = 1;
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
+    
+    // Draw relationship indicators
+    if (distance > 60) { // Only draw if nodes are far enough apart
+      const angle = Math.atan2(dy, dx);
+      const arrowSize = 6;
+      
+      // Draw arrow or circle based on relationship type
+      ctx.fillStyle = startColor;
+      ctx.strokeStyle = startColor;
+      
+      if (link.relationship === "one-to-many") {
+        // Draw arrow at target
+        const arrowX = target.x - Math.cos(angle) * 20;
+        const arrowY = target.y - Math.sin(angle) * 20;
+        
+        ctx.beginPath();
+        ctx.moveTo(
+          arrowX - Math.cos(angle - Math.PI / 6) * arrowSize,
+          arrowY - Math.sin(angle - Math.PI / 6) * arrowSize
+        );
+        ctx.lineTo(arrowX, arrowY);
+        ctx.lineTo(
+          arrowX - Math.cos(angle + Math.PI / 6) * arrowSize,
+          arrowY - Math.sin(angle + Math.PI / 6) * arrowSize
+        );
+        ctx.fill();
+      } else if (link.relationship === "many-to-many") {
+        // Draw circles at both ends
+        ctx.beginPath();
+        ctx.arc(
+          source.x + Math.cos(angle) * 15,
+          source.y + Math.sin(angle) * 15,
+          3, 0, 2 * Math.PI
+        );
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(
+          target.x - Math.cos(angle) * 15,
+          target.y - Math.sin(angle) * 15,
+          3, 0, 2 * Math.PI
+        );
+        ctx.fill();
+      }
+    }
   };
 
   return (
