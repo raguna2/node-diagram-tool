@@ -13,14 +13,15 @@ interface DataPreviewProps {
   tableName: string | undefined;
   onRowSelect?: (data: Record<string, any>, tableName: string) => void;
   selectedRowData?: Record<string, any> | null;
+  selectedNodeTable?: string | null;
 }
 
-export default function DataPreview({ tableName, onRowSelect, selectedRowData }: DataPreviewProps) {
+export default function DataPreview({ tableName, onRowSelect, selectedRowData, selectedNodeTable }: DataPreviewProps) {
   if (!tableName || !sampleTableData[tableName]) return null;
 
   // リレーションに基づいてデータを絞り込む
   let data = sampleTableData[tableName];
-  if (selectedRowData && tableName === selectedNode?.table) {
+  if (selectedRowData && selectedNodeTable === tableName) {
     const relation = findRelatedTable(tableName);
     if (relation) {
       // ズームイン時のみ関連テーブルのデータを絞り込む

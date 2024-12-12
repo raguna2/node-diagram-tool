@@ -481,6 +481,7 @@ export default function ForceGraphEditor({
                 tableName={selectedNode?.table} 
                 onRowSelect={handleRowSelect}
                 selectedRowData={selectedRowData}
+                selectedNodeTable={selectedNode?.table}
               />
             </div>
           </div>
