@@ -562,7 +562,7 @@ export default function ForceGraphEditor({
             linkCanvasObject={paintLink}
             linkColor={() => "transparent"}
             linkDirectionalArrowLength={0}
-            width={window.innerWidth - 464 - 64} // TableListSidebar(64px)とデータプレビュー(400px)を考慮
+            width={64} // TableListSidebarと同じ幅
             height={window.innerHeight - 64}
             d3Force={(engine: any) => {
               engine
@@ -585,7 +585,7 @@ export default function ForceGraphEditor({
         </div>
 
         {/* Data preview sidebar */}
-        <div className="w-[400px] border-l border-[#47FFDE] bg-[#2C2C2C]">
+        <div className="flex-1 border-l border-[#47FFDE] bg-[#2C2C2C]">
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-[#BBBBBB]">
