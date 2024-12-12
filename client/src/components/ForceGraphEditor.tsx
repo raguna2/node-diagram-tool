@@ -72,11 +72,16 @@ export default function ForceGraphEditor({
     
     // 現在のビューポートの中心からやや上に配置
     const currentZoom = fg.zoom();
-    const viewportWidth = fg.width() / currentZoom;
-    const viewportHeight = fg.height() / currentZoom;
+    const width = fg.getGraphBbox().width || window.innerWidth;
+    const height = fg.getGraphBbox().height || window.innerHeight;
     
-    node.fx = viewportWidth / 2;
-    node.fy = (viewportHeight / 2) - 100; // ツールチップのスペースを確保するため上に配置
+    // ビューポートの中心を計算
+    const centerX = width / 2;
+    const centerY = height / 2;
+    
+    // ノードを中心からやや上に配置
+    node.fx = centerX;
+    node.fy = centerY - 100; // ツールチップのスペースを確保するため上に配置
     
     fg.centerAt(node.fx, node.fy, 1000);
   }, []);
