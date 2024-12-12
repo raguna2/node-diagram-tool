@@ -14,7 +14,7 @@ interface DataPreviewProps {
   selectedRowData?: Record<string, any> | null;
 }
 
-export default function DataPreview({ tableName, onRowSelect }: DataPreviewProps) {
+export default function DataPreview({ tableName, onRowSelect, selectedRowData }: DataPreviewProps) {
   if (!tableName || !sampleTableData[tableName]) return null;
 
   const data = sampleTableData[tableName];
