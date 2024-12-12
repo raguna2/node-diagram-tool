@@ -39,7 +39,7 @@ export default function DataPreview({ tableName, onRowSelect, selectedRowData }:
           {data.map((row, i) => (
             <TableRow 
               key={i} 
-              className={`hover:bg-[#3C3C3C] cursor-pointer ${row === selectedRowData ? 'border-2 border-[#7B61FF]' : ''}`}
+              className={`hover:bg-[#3C3C3C] cursor-pointer ${row === selectedRowData ? 'bg-[#7B61FF]' : ''}`}
               onClick={() => onRowSelect?.(row)}
             >
               {columns.map((column) => (

@@ -7,7 +7,6 @@ import TableSchema from "@/components/TableSchema";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataPreview from "@/components/DataPreview";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 interface ForceGraphProps {
   charge?: number;
@@ -18,8 +17,6 @@ interface ForceGraphProps {
 interface NodeObject {
   x?: number;
   y?: number;
-  fx?: number;
-  fy?: number;
   id: string;
   group: number;
   table: string;
@@ -61,40 +58,104 @@ export default function ForceGraphEditor({
 
   const handleNodeClick = useCallback((node: NodeObject) => {
     setSelectedNode(node);
-    setSelectedRowData(null); // Reset selected row data when changing nodes
     zoomToNode(node);
   }, [zoomToNode]);
 
-  // 選択されたデータに基づいてノードの位置を調整
-  const adjustNodePosition = useCallback((node: NodeObject) => {
-    if (!fgRef.current) return;
-    const fg = fgRef.current;
+  // 選択されたノードの接続先ノードを取得
+  const connectedNodes = useMemo(() => {
+    if (!selectedNode) return [];
+    const connections = graphData.links.filter(link => {
+      const source = typeof link.source === 'string' ? link.source : link.source.id;
+      const target = typeof link.target === 'string' ? link.target : link.target.id;
+      return source === selectedNode.id || target === selectedNode.id;
+    });
+    return connections.map(link => {
+      const connectedId = (typeof link.source === 'string' ? link.source : link.source.id) === selectedNode.id 
+        ? (typeof link.target === 'string' ? link.target : link.target.id) 
+        : (typeof link.source === 'string' ? link.source : link.source.id);
+      return graphData.nodes.find(node => node.id === connectedId);
+    }).filter((node): node is NodeObject => node !== undefined);
+  }, [selectedNode, graphData]);
+
+  // 現在のノードのインデックスを取得
+  const currentNodeIndex = useMemo(() => {
+    if (!selectedNode || !connectedNodes || connectedNodes.length === 0) return -1;
+    return connectedNodes.findIndex(node => node.id === selectedNode.id);
+  }, [selectedNode, connectedNodes]);
+
+  const navigateToNode = useCallback((targetNode: NodeObject) => {
+    const graphNode = graphData.nodes.find(n => n.id === targetNode.id);
+    if (graphNode) {
+      handleNodeClick(graphNode);
+    }
+  }, [graphData.nodes, handleNodeClick]);
+
+  const handleNext = useCallback(() => {
+    if (!connectedNodes || connectedNodes.length === 0) return;
+    const nextIndex = (currentNodeIndex + 1) % connectedNodes.length;
+    const nextNode = connectedNodes[nextIndex];
+    if (nextNode) {
+      navigateToNode(nextNode);
+    }
+  }, [currentNodeIndex, connectedNodes, navigateToNode]);
+
+  const handlePrev = useCallback(() => {
+    if (!connectedNodes || connectedNodes.length === 0) return;
     
-    // 現在のビューポートの中心からやや上に配置
-    const currentZoom = fg.zoom();
-    const width = fg.getGraphBbox().width || window.innerWidth;
-    const height = fg.getGraphBbox().height || window.innerHeight;
+    let prevIndex;
+    if (currentNodeIndex === -1) {
+      prevIndex = connectedNodes.length - 1;
+    } else {
+      prevIndex = currentNodeIndex === 0 ? connectedNodes.length - 1 : currentNodeIndex - 1;
+    }
     
-    // ビューポートの中心を計算
-    const centerX = width / 2;
-    const centerY = height / 2;
-    
-    // ノードを中心からやや上に配置
-    node.fx = centerX;
-    node.fy = centerY - 100; // ツールチップのスペースを確保するため上に配置
-    
-    fg.centerAt(node.fx, node.fy, 1000);
+    const prevNode = connectedNodes[prevIndex];
+    if (prevNode) {
+      navigateToNode(prevNode);
+    }
+  }, [currentNodeIndex, connectedNodes, navigateToNode]);
+
+  const handleBack = useCallback(() => {
+    setSelectedNode(null);
+    if (fgRef.current) {
+      const fg = fgRef.current;
+      // 即座にズームアウトを開始
+      fg.zoom(4, 0);
+      
+      // 中間のズームアウト
+      setTimeout(() => {
+        fg.zoom(0.3, 200);
+      }, 0);
+      
+      // 最終的な位置とズームレベルに戻る
+      setTimeout(() => {
+        fg.centerAt(0, 0, 400);
+        fg.zoom(1, 400);
+      }, 200);
+    }
   }, []);
 
-  // データ行選択時の処理を拡張
-  const handleRowSelect = useCallback((data: Record<string, any>) => {
-    setSelectedRowData(data);
-    if (selectedNode) {
-      adjustNodePosition(selectedNode);
-    }
-  }, [selectedNode, adjustNodePosition]);
+  useEffect(() => {
+    if (fgRef.current && isAutoRotate) {
+      const distance = 400;
+      let angle = 0;
 
-  const paintNode = useCallback((node: NodeObject, ctx: CanvasRenderingContext2D) => {
+      const interval = setInterval(() => {
+        const fg = fgRef.current;
+        if (fg) {
+          fg.centerAt(
+            distance * Math.sin(angle),
+            distance * Math.cos(angle)
+          );
+        }
+        angle += Math.PI / 300;
+      }, 30);
+
+      return () => clearInterval(interval);
+    }
+  }, [isAutoRotate]);
+  
+  const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
     // 選択されたノードがある場合、そのノード以外は描画しない
@@ -155,19 +216,17 @@ export default function ForceGraphEditor({
       const tooltipWidth = ctx.measureText(tooltipText).width + 10;
       const tooltipHeight = 20;
       const tooltipX = node.x - tooltipWidth / 2;
-      const tooltipY = node.y - nodeRadius * 5;
+      const tooltipY = node.y - nodeRadius * 4;
 
-      // Draw tooltip background
+      // Draw tooltip background with arrow
       ctx.fillStyle = '#2C2C2C';
       ctx.beginPath();
       ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 4);
       
       // Draw arrow
-      ctx.beginPath();
       ctx.moveTo(node.x, tooltipY + tooltipHeight);
-      ctx.lineTo(node.x - 8, tooltipY + tooltipHeight);
-      ctx.lineTo(node.x, tooltipY + tooltipHeight + 8);
-      ctx.lineTo(node.x + 8, tooltipY + tooltipHeight);
+      ctx.lineTo(node.x - 6, tooltipY + tooltipHeight - 6);
+      ctx.lineTo(node.x + 6, tooltipY + tooltipHeight - 6);
       ctx.closePath();
       
       ctx.fill();
@@ -183,9 +242,9 @@ export default function ForceGraphEditor({
     
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
-  }, [selectedNode, selectedRowData, nodeRadius]);
+  };
 
-  const paintLink = useCallback((link: LinkObject, ctx: CanvasRenderingContext2D) => {
+  const paintLink = (link: LinkObject, ctx: CanvasRenderingContext2D) => {
     const start = typeof link.source === 'string' ? graphData.nodes.find(n => n.id === link.source) : link.source;
     const end = typeof link.target === 'string' ? graphData.nodes.find(n => n.id === link.target) : link.target;
     
@@ -245,90 +304,102 @@ export default function ForceGraphEditor({
     ctx.stroke();
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
-  }, [selectedNode, graphData.nodes]);
+  };
 
   return (
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-1">
         <div className="flex flex-col flex-1">
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={75} minSize={30}>
-              <div className="h-full bg-white relative">
-                <div className="absolute top-4 left-4 z-10">
+          <div className="flex flex-1">
+            <div className="flex-1 bg-white relative">
+              <div className="absolute top-4 left-4 z-10">
+                <Button
+                  onClick={handleBack}
+                  variant="ghost"
+                  className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                >
+                  ← Back
+                </Button>
+              </div>
+              {selectedNode && connectedNodes.length > 0 && (
+                <div className="absolute top-4 right-4 flex gap-2 z-10">
                   <Button
-                    onClick={() => setSelectedNode(null)}
+                    onClick={handlePrev}
                     variant="ghost"
-                    className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                    className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
                   >
-                    ← Back
+                    <ArrowLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    variant="ghost"
+                    className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                  >
+                    <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
-                <ForceGraph2D
-                  ref={fgRef}
-                  graphData={graphData}
-                  nodeLabel="id"
-                  backgroundColor="#ffffff"
-                  width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
-                  height={(window.innerHeight - 64) * 0.7}
-                  d3Force={(engine: any) => {
-                    engine
-                      .force('charge', d3.forceManyBody().strength(charge))
-                      .force('collide', d3.forceCollide(nodeRadius * 1.5))
-                      .force('link', d3.forceLink().distance(linkDistance))
-                      .force('center', d3.forceCenter());
-                  }}
-                  d3VelocityDecay={0.3}
-                  enableNodeDrag={true}
-                  enableZoomPanInteraction={true}
-                  onNodeClick={handleNodeClick}
-                  onNodeDragEnd={(node: NodeObject) => {
-                    node.fx = node.x;
-                    node.fy = node.y;
-                  }}
-                  autoPauseRedraw={false}
-                  nodeCanvasObject={paintNode}
-                  nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
-                    if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
-                    ctx.beginPath();
-                    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = color;
-                    ctx.fill();
-                  }}
-                  linkCanvasObject={paintLink}
-                  linkColor={() => "transparent"}
-                  linkDirectionalArrowLength={0}
-                />
-              </div>
-            </ResizablePanel>
-            {selectedNode && (
-              <>
-                <ResizableHandle />
-                <ResizablePanel defaultSize={25} minSize={20}>
-                  <TableSchema node={selectedNode} selectedRowData={selectedRowData} />
-                </ResizablePanel>
-              </>
-            )}
-          </ResizablePanelGroup>
-          {selectedNode && (
-            <ResizablePanelGroup direction="vertical">
-              <ResizableHandle />
-              <ResizablePanel defaultSize={30} minSize={20}>
-                <div className="h-full border-t border-[#47FFDE] bg-[#2C2C2C] overflow-hidden">
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
-                      データプレビュー: {selectedNode?.table}
-                    </h3>
-                    <DataPreview 
-                      tableName={selectedNode?.table} 
-                      onRowSelect={handleRowSelect}
-                      selectedRowData={selectedRowData}
-                    />
-                  </div>
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          )}
+              )}
+              <ForceGraph2D
+                ref={fgRef}
+                graphData={graphData}
+                nodeLabel="id"
+                backgroundColor="#ffffff"
+                width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
+                height={(window.innerHeight - 64) * 0.7}
+                d3Force={(engine: any) => {
+                  engine
+                    .force('charge', d3.forceManyBody().strength(charge))
+                    .force('collide', d3.forceCollide(nodeRadius * 1.5))
+                    .force('link', d3.forceLink().distance(linkDistance))
+                    .force('center', d3.forceCenter());
+                }}
+                d3VelocityDecay={0.3}
+                enableNodeDrag={true}
+                enableZoomPanInteraction={true}
+                onNodeClick={handleNodeClick}
+                onNodeDragEnd={(node: NodeObject) => {
+                  node.fx = node.x;
+                  node.fy = node.y;
+                }}
+                autoPauseRedraw={false}
+                nodeCanvasObject={paintNode}
+                nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
+                  if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                  ctx.fillStyle = color;
+                  ctx.fill();
+                }}
+                linkCanvasObject={paintLink}
+                linkColor={() => "transparent"}
+                linkDirectionalArrowLength={0}
+              />
+            </div>
+            <div 
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                selectedNode ? 'w-1/3 border-l border-[#47FFDE]' : 'w-0'
+              }`}
+            >
+              <TableSchema node={selectedNode} selectedRowData={selectedRowData} />
+            </div>
+          </div>
+          <div 
+            className={`transition-all duration-300 ease-in-out ${
+              selectedNode ? 'h-[30vh]' : 'h-0'
+            } border-t border-[#47FFDE] bg-[#2C2C2C] overflow-hidden`}
+          >
+            <div className="p-4">
+              <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
+                データプレビュー: {selectedNode?.table}
+              </h3>
+              <DataPreview 
+                tableName={selectedNode?.table} 
+                onRowSelect={setSelectedRowData}
+                selectedRowData={selectedRowData}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
