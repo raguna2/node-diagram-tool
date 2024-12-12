@@ -118,7 +118,7 @@ export default function ForceGraphEditor({
         ? (typeof link.target === 'string' ? link.target : link.target.id) 
         : (typeof link.source === 'string' ? link.source : link.source.id);
       return graphData.nodes.find(node => node.id === connectedId);
-    }).filter((node): node is NodeObject => node !== undefined);
+    }).filter((node): node is CustomNodeObject => node !== undefined);
   }, [selectedNode, graphData]);
 
   // 現在のノードのインデックスを取得
@@ -127,7 +127,7 @@ export default function ForceGraphEditor({
     return connectedNodes.findIndex(node => node.id === selectedNode.id);
   }, [selectedNode, connectedNodes]);
 
-  const navigateToNode = useCallback((targetNode: NodeObject) => {
+  const navigateToNode = useCallback((targetNode: CustomNodeObject) => {
     const graphNode = graphData.nodes.find(n => n.id === targetNode.id);
     if (graphNode) {
       handleNodeClick(graphNode);
@@ -412,7 +412,7 @@ export default function ForceGraphEditor({
                 graphData={graphData}
                 nodeLabel="id"
                 backgroundColor="#ffffff"
-                onNodeClick={(node: NodeObject) => {
+                onNodeClick={(node: CustomNodeObject) => {
                   handleNodeClick(node);
                 }}
                 onBackgroundClick={() => {
@@ -441,7 +441,7 @@ export default function ForceGraphEditor({
                 d3VelocityDecay={0.3}
                 enableNodeDrag={true}
                 enableZoomPanInteraction={true}
-                onNodeDragEnd={(node: NodeObject) => {
+                onNodeDragEnd={(node: CustomNodeObject) => {
                   node.fx = node.x;
                   node.fy = node.y;
                 }}
