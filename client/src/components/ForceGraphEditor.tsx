@@ -40,6 +40,7 @@ export default function ForceGraphEditor({
   const fgRef = useRef<any>();
   const nodeRadius = 12;
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
+  const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
   const [selectedRowData, setSelectedRowData] = useState<Record<string, any> | null>(null);
   const [graphData, setGraphData] = useState(sampleData);
 
@@ -63,8 +64,12 @@ export default function ForceGraphEditor({
     // 同じノードをクリックした場合は何もしない
     if (selectedNode?.id === node.id) return;
     
-    // 新しいノードを選択する前に、現在の選択状態を保持
-    const prevSelectedNode = selectedNode;
+    // 新しいノードを選択状態に追加
+    setSelectedNodes(prev => {
+      const newSet = new Set(prev);
+      newSet.add(node.id);
+      return newSet;
+    });
     
     setSelectedNode(node);
     setSelectedRowData(null); // ノードを切り替えた時は選択をリセット
@@ -72,13 +77,11 @@ export default function ForceGraphEditor({
     // ズームトゥアニメーション
     zoomToNode(node);
     
-    // 前のノードの状態を保持
-    if (prevSelectedNode) {
-      const graphNode = graphData.nodes.find(n => n.id === prevSelectedNode.id);
-      if (graphNode) {
-        graphNode.fx = graphNode.x;
-        graphNode.fy = graphNode.y;
-      }
+    // ノードの位置を固定
+    const graphNode = graphData.nodes.find(n => n.id === node.id);
+    if (graphNode) {
+      graphNode.fx = graphNode.x;
+      graphNode.fy = graphNode.y;
     }
   }, [selectedNode, zoomToNode, graphData.nodes]);
 
@@ -178,19 +181,20 @@ export default function ForceGraphEditor({
   const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
-    const isSelected = selectedNode && node.id === selectedNode.id;
+    const isCurrentSelected = selectedNode && node.id === selectedNode.id;
+    const isEverSelected = selectedNodes.has(node.id);
     const currentZoom = fgRef.current?.zoom() || 1;
     const isZoomedIn = currentZoom > 2;
 
     // ズームイン時のみ、選択されていないノードを非表示に
-    if (isZoomedIn && !isSelected && selectedNode) return;
+    if (isZoomedIn && !isCurrentSelected && selectedNode) return;
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
     const pulseSize = 1 + Math.sin(time * 2) * 0.1; // Pulsating effect
     
     // Outer glow for selected state
-    if (isSelected) {
+    if (isCurrentSelected || isEverSelected) {
       const outerGlow = ctx.createRadialGradient(
         node.x, node.y, nodeRadius * 1.5,
         node.x, node.y, nodeRadius * 3 * pulseSize
