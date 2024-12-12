@@ -500,7 +500,7 @@ export default function ForceGraphEditor({
       )}
 
       {/* Main content */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 max-w-full">
         {/* Table list sidebar */}
         <TableListSidebar
           onTableSelect={(tableId) => {
@@ -511,7 +511,7 @@ export default function ForceGraphEditor({
         />
 
         {/* Force graph area */}
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-w-0">
           {selectedNode && (
             <div className="absolute top-4 left-4 z-10">
               <Button
@@ -562,7 +562,7 @@ export default function ForceGraphEditor({
             linkCanvasObject={paintLink}
             linkColor={() => "transparent"}
             linkDirectionalArrowLength={0}
-            width={window.innerWidth - 464} 
+            width={window.innerWidth - 464 - 64} // TableListSidebar(64px)とデータプレビュー(400px)を考慮
             height={window.innerHeight - 64}
             d3Force={(engine: any) => {
               engine
