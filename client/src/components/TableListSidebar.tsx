@@ -24,12 +24,12 @@ export default function TableListSidebar({ onTableSelect, selectedNode }: TableL
           <Input
             type="search"
             placeholder="テーブルを検索..."
-            className="bg-[#1C1C1C] border-[#47FFDE]/20 text-[#BBBBBB] placeholder:text-[#666666] h-8 pl-8 text-sm focus:border-[#47FFDE] transition-colors"
+            className="bg-[#1C1C1C] border-[#47FFDE]/10 text-[#BBBBBB] placeholder:text-[#666666] h-8 pl-8 text-sm focus:border-[#47FFDE] hover:border-[#47FFDE]/30 transition-all rounded-md"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
           <svg
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#47FFDE]/50"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
