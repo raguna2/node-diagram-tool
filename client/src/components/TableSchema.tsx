@@ -69,7 +69,7 @@ export default function TableSchema({ node, selectedRowData }: TableSchemaProps)
   };
 
   return (
-    <Card className="p-6 bg-[#2C2C2C] text-[#BBBBBB] h-full overflow-auto transition-opacity duration-300 ease-in-out">
+    <Card className="p-4 xl:p-6 bg-[#2C2C2C] text-[#BBBBBB] h-full overflow-auto transition-opacity duration-300 ease-in-out">
       <h2 className="text-xl font-semibold mb-4 transition-transform duration-300 ease-in-out">
         テーブル: {node.table}
       </h2>
