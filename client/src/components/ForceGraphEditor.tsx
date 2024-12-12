@@ -189,6 +189,17 @@ export default function ForceGraphEditor({
       return () => clearInterval(interval);
     }
   }, [isAutoRotate]);
+  // ズームレベルの変更を監視
+  useEffect(() => {
+    if (fgRef.current) {
+      const fg = fgRef.current;
+      fg.onZoom(() => {
+        // コンポーネントの再レンダリングを強制
+        setGraphData(prevData => ({ ...prevData }));
+      });
+    }
+  }, []);
+
   
   const paintNode = (node: CustomNodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
@@ -562,7 +573,7 @@ export default function ForceGraphEditor({
             linkCanvasObject={paintLink}
             linkColor={() => "transparent"}
             linkDirectionalArrowLength={0}
-            width={64} // TableListSidebarと同じ幅
+            width={300} // TableListSidebarと同じ幅
             height={window.innerHeight - 64}
             d3Force={(engine: any) => {
               engine
@@ -585,8 +596,12 @@ export default function ForceGraphEditor({
         </div>
 
         {/* Data preview sidebar */}
-        <div className="flex-1 border-l border-[#47FFDE] bg-[#2C2C2C]">
-          <div className="p-4">
+        <div 
+          className={`transition-all duration-300 border-l border-[#47FFDE] bg-[#2C2C2C] ${
+            (fgRef.current?.zoom() || 1) < 2 ? 'w-0 opacity-0' : 'flex-1 opacity-100'
+          }`}
+        >
+          <div className="p-4 overflow-x-auto">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-[#BBBBBB]">
                 データプレビュー: {selectedNode?.table || ''}

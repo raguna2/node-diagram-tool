@@ -21,8 +21,8 @@ export default function DataPreview({ tableName, onRowSelect, selectedRowData }:
   const columns = Object.keys(data[0]);
 
   return (
-    <div className="overflow-auto max-h-[calc(30vh-2rem)]">
-      <Table>
+    <div className="overflow-auto max-h-[calc(30vh-2rem)] w-full">
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow>
             {columns.map((column) => (
