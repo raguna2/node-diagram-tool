@@ -43,7 +43,7 @@ export default function ForceGraphEditor({
 
   // 現在のノードのインデックスを取得
   const currentNodeIndex = useMemo(() => {
-    if (!selectedNode || connectedNodes.length === 0) return -1;
+    if (!selectedNode || !connectedNodes || connectedNodes.length === 0) return -1;
     return connectedNodes.findIndex(node => node.id === selectedNode.id);
   }, [selectedNode, connectedNodes]);
 
@@ -60,14 +60,23 @@ export default function ForceGraphEditor({
 
   // 前のノードに移動
   const handlePrev = useCallback(() => {
-    if (connectedNodes.length === 0) return;
-    const prevIndex = currentNodeIndex === 0 ? connectedNodes.length - 1 : currentNodeIndex - 1;
+    if (!connectedNodes || connectedNodes.length === 0) return;
+    
+    let prevIndex;
+    if (currentNodeIndex === -1) {
+      prevIndex = connectedNodes.length - 1;
+    } else {
+      prevIndex = currentNodeIndex === 0 ? connectedNodes.length - 1 : currentNodeIndex - 1;
+    }
+    
     const prevNode = connectedNodes[prevIndex];
+    if (!prevNode) return;
+    
     const graphNode = graphData.nodes.find(n => n.id === prevNode.id);
     if (graphNode) {
       handleNodeClick(graphNode);
     }
-  }, [currentNodeIndex, connectedNodes, graphData.nodes]);
+  }, [currentNodeIndex, connectedNodes, graphData.nodes, handleNodeClick]);
 
   useEffect(() => {
     if (fgRef.current && isAutoRotate) {
