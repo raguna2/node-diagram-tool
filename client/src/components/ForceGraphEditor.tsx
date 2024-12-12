@@ -359,12 +359,7 @@ export default function ForceGraphEditor({
                   handleNodeClick(node);
                 }}
                 onBackgroundClick={() => {
-                  setSelectedNode(null);
                   setSelectedRowData(null);
-                  if (fgRef.current) {
-                    const fg = fgRef.current;
-                    fg.zoomToFit(400);
-                  }
                 }}
                 nodeCanvasObject={(node: NodeObject, ctx: CanvasRenderingContext2D) => {
                   if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
