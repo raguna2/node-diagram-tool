@@ -484,104 +484,104 @@ export default function ForceGraphEditor({
         />
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
-            <div className="flex-1 bg-white relative">
-              
-              {selectedNode && (
-                <div className="absolute top-4 left-4 z-10">
-                  <Button
-                    onClick={handleBack}
-                    variant="ghost"
-                    className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                  >
-                    ← Back
-                  </Button>
-                </div>
-              )}
-              {selectedNode && connectedNodes.length > 0 && (
-                <div className="absolute top-4 right-4 flex gap-2 z-10">
-                  <Button
-                    onClick={handlePrev}
-                    variant="ghost"
-                    className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    onClick={handleNext}
-                    variant="ghost"
-                    className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                  >
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-              <ForceGraph2D
-                ref={fgRef}
-                graphData={graphData}
-                nodeLabel="id"
-                backgroundColor="#ffffff"
-                onNodeClick={(node: CustomNodeObject) => {
-                  handleNodeClick(node);
-                }}
-                onBackgroundClick={() => {
-                  setSelectedRowDataMap(new Map());
-                }}
-                nodeCanvasObject={paintNode}
-                onNodeHover={(node: CustomNodeObject | null) => {
-                  setHoveredNode(node);
-                }}
-                nodePointerAreaPaint={(node: D3Node, color: string, ctx: CanvasRenderingContext2D) => {
-                  if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
-                  ctx.beginPath();
-                  ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-                  ctx.fillStyle = color;
-                  ctx.fill();
-                }}
-                linkCanvasObject={paintLink}
-                linkColor={() => "transparent"}
-                linkDirectionalArrowLength={0}
-                width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
-                height={(window.innerHeight - 64) * 0.7}
-                d3Force={(engine: any) => {
-                  engine
-                    .force('charge', d3.forceManyBody().strength(charge))
-                    .force('collide', d3.forceCollide(nodeRadius * 1.5))
-                    .force('link', d3.forceLink().distance(linkDistance))
-                    .force('center', d3.forceCenter());
-                }}
-                d3VelocityDecay={0.3}
-                enableNodeDrag={true}
-                enableZoomPanInteraction={true}
-                onNodeDragEnd={(node: CustomNodeObject) => {
-                  node.fx = node.x;
-                  node.fy = node.y;
-                }}
-                autoPauseRedraw={false}
-              />
-              
-            </div>
-            {/* スキーマ情報は削除し、ホバーで表示するように変更 */}
-          </div>
-          {selectedNode && (
-            <div className="w-96 border-l border-[#47FFDE] bg-[#2C2C2C] overflow-hidden">
-              <div className="p-4">
-                <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
-                  データプレビュー: {selectedNode.table}
-                </h3>
-                <DataPreview 
-                  tableName={selectedNode.table} 
-                  onRowSelect={(data) => {
-                    setSelectedRowDataMap(prev => {
-                      const newMap = new Map(prev);
-                      newMap.set(selectedNode.id, data);
-                      return newMap;
-                    });
+            <div className="flex bg-white relative">
+              <div className="relative">
+                {selectedNode && (
+                  <div className="absolute top-4 left-4 z-10">
+                    <Button
+                      onClick={handleBack}
+                      variant="ghost"
+                      className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                    >
+                      ← Back
+                    </Button>
+                  </div>
+                )}
+                {selectedNode && connectedNodes.length > 0 && (
+                  <div className="absolute top-4 right-4 flex gap-2 z-10">
+                    <Button
+                      onClick={handlePrev}
+                      variant="ghost"
+                      className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      onClick={handleNext}
+                      variant="ghost"
+                      className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+                <ForceGraph2D
+                  ref={fgRef}
+                  graphData={graphData}
+                  nodeLabel="id"
+                  backgroundColor="#ffffff"
+                  onNodeClick={(node: CustomNodeObject) => {
+                    handleNodeClick(node);
                   }}
-                  selectedRowData={selectedRowDataMap.get(selectedNode.id)}
+                  onBackgroundClick={() => {
+                    setSelectedRowDataMap(new Map());
+                  }}
+                  nodeCanvasObject={paintNode}
+                  onNodeHover={(node: CustomNodeObject | null) => {
+                    setHoveredNode(node);
+                  }}
+                  nodePointerAreaPaint={(node: D3Node, color: string, ctx: CanvasRenderingContext2D) => {
+                    if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                    ctx.fillStyle = color;
+                    ctx.fill();
+                  }}
+                  linkCanvasObject={paintLink}
+                  linkColor={() => "transparent"}
+                  linkDirectionalArrowLength={0}
+                  width={window.innerWidth - (selectedNode ? 400 : 64)}
+                  height={window.innerHeight - 64}
+                  d3Force={(engine: any) => {
+                    engine
+                      .force('charge', d3.forceManyBody().strength(charge))
+                      .force('collide', d3.forceCollide(nodeRadius * 1.5))
+                      .force('link', d3.forceLink().distance(linkDistance))
+                      .force('center', d3.forceCenter());
+                  }}
+                  d3VelocityDecay={0.3}
+                  enableNodeDrag={true}
+                  enableZoomPanInteraction={true}
+                  onNodeDragEnd={(node: CustomNodeObject) => {
+                    node.fx = node.x;
+                    node.fy = node.y;
+                  }}
+                  autoPauseRedraw={false}
                 />
               </div>
+              
+              {selectedNode && (
+                <div className="w-[400px] border-l border-[#47FFDE] bg-[#2C2C2C]">
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
+                      データプレビュー: {selectedNode.table}
+                    </h3>
+                    <DataPreview 
+                      tableName={selectedNode.table} 
+                      onRowSelect={(data) => {
+                        setSelectedRowDataMap(prev => {
+                          const newMap = new Map(prev);
+                          newMap.set(selectedNode.id, data);
+                          return newMap;
+                        });
+                      }}
+                      selectedRowData={selectedRowDataMap.get(selectedNode.id)}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
