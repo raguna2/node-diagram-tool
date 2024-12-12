@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { sampleData } from "@/lib/sampleData";
 import * as d3 from "d3-force";
 import Header from "@/components/Header";
+import TableSchema from "@/components/TableSchema";
 
 interface ForceGraphProps {
   charge?: number;
