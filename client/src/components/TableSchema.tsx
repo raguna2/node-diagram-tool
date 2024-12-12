@@ -10,7 +10,7 @@ interface TableSchemaProps {
   selectedRowData?: Record<string, any> | null;
 }
 
-export default function TableSchema({ node }: TableSchemaProps) {
+export default function TableSchema({ node, selectedRowData }: TableSchemaProps) {
   if (!node) return null;
 
   // テーブルごとのスキーマ定義
