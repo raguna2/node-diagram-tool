@@ -17,6 +17,8 @@ interface ForceGraphProps {
   isAutoRotate?: boolean;
 }
 
+import { GraphData } from 'react-force-graph-2d';
+
 interface NodeObject {
   x?: number;
   y?: number;
@@ -36,6 +38,8 @@ interface LinkObject {
   value: number;
 }
 
+type ForceGraphData = GraphData<NodeObject, LinkObject>;
+
 type D3Node = NodeObject & {
   x: number;
   y: number;
@@ -43,11 +47,9 @@ type D3Node = NodeObject & {
   vy: number;
 };
 
-type D3Link = {
+type D3Link = LinkObject & {
   source: D3Node;
   target: D3Node;
-  relationship: string;
-  value: number;
 };
 
 export default function ForceGraphEditor({
@@ -60,7 +62,7 @@ export default function ForceGraphEditor({
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
   const [selectedRowDataMap, setSelectedRowDataMap] = useState<Map<string, Record<string, any>>>(new Map());
-  const [graphData, setGraphData] = useState(sampleData);
+  const [graphData, setGraphData] = useState<ForceGraphData>(sampleData);
 
   const zoomToNode = useCallback((node: NodeObject) => {
     if (!fgRef.current) return;
