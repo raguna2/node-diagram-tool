@@ -41,7 +41,7 @@ export default function DataPreview({ tableName, onRowSelect, selectedRowData }:
               key={i} 
               className={`hover:bg-[#3C3C3C] cursor-pointer ${
                 selectedRowData?.id === row.id 
-                  ? 'border-t border-b border-[#7B61FF]' 
+                  ? 'outline outline-2 outline-[#7B61FF]' 
                   : ''
               }`}
               onClick={() => onRowSelect?.(row)}
