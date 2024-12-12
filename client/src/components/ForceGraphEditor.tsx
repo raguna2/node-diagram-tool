@@ -453,6 +453,7 @@ export default function ForceGraphEditor({
   };
 
   const [hoveredNode, setHoveredNode] = useState<CustomNodeObject | null>(null);
+  const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
 
   return (
     <div className="flex flex-col h-screen">
@@ -472,6 +473,35 @@ export default function ForceGraphEditor({
           }}
         >
           {hoveredNode.tooltip.content}
+        </div>
+      )}
+      {isPreviewFullscreen && selectedNode && (
+        <div className="fixed inset-0 z-50 bg-[#2C2C2C] bg-opacity-95 backdrop-blur-sm flex items-center justify-center">
+          <div className="w-11/12 h-5/6 bg-[#2C2C2C] rounded-lg border border-[#47FFDE] p-6 relative">
+            <Button
+              onClick={() => setIsPreviewFullscreen(false)}
+              variant="ghost"
+              className="absolute top-4 right-4 text-[#BBBBBB] hover:bg-[#3C3C3C]"
+            >
+              ✕
+            </Button>
+            <h2 className="text-xl font-medium text-[#47FFDE] mb-6">
+              {selectedNode.table} - データプレビュー
+            </h2>
+            <div className="h-[calc(100%-4rem)] overflow-auto">
+              <DataPreview
+                tableName={selectedNode.table}
+                onRowSelect={(data) => {
+                  setSelectedRowDataMap(prev => {
+                    const newMap = new Map(prev);
+                    newMap.set(selectedNode.id, data);
+                    return newMap;
+                  });
+                }}
+                selectedRowData={selectedRowDataMap.get(selectedNode.id)}
+              />
+            </div>
+          </div>
         </div>
       )}
       <div className="flex flex-1">
@@ -540,7 +570,7 @@ export default function ForceGraphEditor({
                   linkCanvasObject={paintLink}
                   linkColor={() => "transparent"}
                   linkDirectionalArrowLength={0}
-                  width={window.innerWidth - (selectedNode ? 400 : 64)}
+                  width={window.innerWidth - (selectedNode ? window.innerWidth / 2 : 64)}
                   height={window.innerHeight - 64}
                   d3Force={(engine: any) => {
                     engine
@@ -561,11 +591,32 @@ export default function ForceGraphEditor({
               </div>
               
               {selectedNode && (
-                <div className="w-[400px] border-l border-[#47FFDE] bg-[#2C2C2C]">
+                <div className="w-1/2 border-l border-[#47FFDE] bg-[#2C2C2C]">
                   <div className="p-4">
-                    <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
-                      データプレビュー: {selectedNode.table}
-                    </h3>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-medium text-[#BBBBBB]">
+                        データプレビュー: {selectedNode.table}
+                      </h3>
+                      <Button
+                        onClick={() => setIsPreviewFullscreen(true)}
+                        variant="ghost"
+                        className="text-[#BBBBBB] hover:bg-[#3C3C3C]"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                        </svg>
+                      </Button>
+                    </div>
                     <DataPreview 
                       tableName={selectedNode.table} 
                       onRowSelect={(data) => {
