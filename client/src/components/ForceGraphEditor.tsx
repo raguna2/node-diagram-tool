@@ -43,18 +43,16 @@ export default function ForceGraphEditor({
   const handleNodeClick = useCallback((node: NodeObject) => {
     setSelectedNode(node);
     if (fgRef.current) {
-      // 他のノードを非表示にし、選択したノードだけを表示
-      const filteredData = {
-        nodes: [node],
-        links: [] // 選択したノードに関連するエッジのみを表示する場合は、ここでフィルタリング
-      };
+      const fg = fgRef.current;
       
-      fgRef.current.graphData(filteredData);
+      // 選択したノードの位置を保存
+      const nodeX = node.x || 0;
+      const nodeY = node.y || 0;
       
-      // ノードを中央に配置し、適切なズームレベルで表示
+      // アニメーションでズームイン
       setTimeout(() => {
-        fgRef.current.centerAt(0, 0, 1000);
-        fgRef.current.zoom(4, 1000);
+        fg.centerAt(nodeX, nodeY, 1000);
+        fg.zoom(4, 1000);
       }, 400);
     }
   }, []);
@@ -76,6 +74,9 @@ export default function ForceGraphEditor({
   
   const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+    
+    // 選択されたノードがある場合、そのノード以外は描画しない
+    if (selectedNode && node.id !== selectedNode.id) return;
 
     // Draw glow effect
     const gradient = ctx.createRadialGradient(
@@ -135,6 +136,11 @@ export default function ForceGraphEditor({
     
     if (typeof start.x === 'undefined' || typeof start.y === 'undefined' ||
         typeof end.x === 'undefined' || typeof end.y === 'undefined') {
+      return;
+    }
+    
+    // 選択されたノードがある場合、そのノードに関連するエッジのみ描画
+    if (selectedNode && start.id !== selectedNode.id && end.id !== selectedNode.id) {
       return;
     }
     
