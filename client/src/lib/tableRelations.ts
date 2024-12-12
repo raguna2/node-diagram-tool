@@ -10,14 +10,14 @@ export const tableRelations: TableRelation[] = [
   {
     sourceTable: "visit_card",
     targetTable: "contact_relation",
-    sourceKey: "id",
+    sourceKey: "contact_relation_id",
     targetKey: "id",
     type: "one-to-one"
   },
   {
     sourceTable: "lbc",
     targetTable: "lbc_relation",
-    sourceKey: "id",
+    sourceKey: "lbc_relation_id",
     targetKey: "id",
     type: "one-to-one"
   }

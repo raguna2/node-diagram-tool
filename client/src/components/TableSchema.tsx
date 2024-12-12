@@ -17,6 +17,7 @@ export default function TableSchema({ node, selectedRowData }: TableSchemaProps)
   const schemas: { [key: string]: Array<{ name: string; type: string; isPrimary?: boolean; isNullable?: boolean; isUnique?: boolean; defaultValue?: string }> } = {
     contact_relation: [
       { name: 'id', type: 'int', isPrimary: true },
+      { name: 'visit_card_id', type: 'int', isUnique: true },
       { name: 'uuid', type: 'uuid', isUnique: true },
       { name: 'tel', type: 'char' },
       { name: 'fax', type: 'char' },
@@ -29,6 +30,7 @@ export default function TableSchema({ node, selectedRowData }: TableSchemaProps)
     ],
     visit_card: [
       { name: 'id', type: 'int', isPrimary: true },
+      { name: 'contact_relation_id', type: 'int', isUnique: true },
       { name: 'company_name', type: 'varchar(255)' },
       { name: 'department', type: 'varchar(255)' },
       { name: 'position', type: 'varchar(100)' },
@@ -49,6 +51,7 @@ export default function TableSchema({ node, selectedRowData }: TableSchemaProps)
     ],
     lbc_relation: [
       { name: 'id', type: 'int', isPrimary: true },
+      { name: 'lbc_id', type: 'int', isUnique: true },
       { name: 'relation_type', type: 'varchar(50)' },
       { name: 'start_date', type: 'datetime' },
       { name: 'end_date', type: 'datetime' },
@@ -58,6 +61,7 @@ export default function TableSchema({ node, selectedRowData }: TableSchemaProps)
     ],
     lbc: [
       { name: 'id', type: 'int', isPrimary: true },
+      { name: 'lbc_relation_id', type: 'int', isUnique: true },
       { name: 'name', type: 'varchar(255)' },
       { name: 'category', type: 'char(1)' },
       { name: 'priority', type: 'int' },
