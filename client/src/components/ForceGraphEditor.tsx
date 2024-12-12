@@ -9,25 +9,30 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataPreview from "@/components/DataPreview";
 
-
 interface ForceGraphProps {
   charge?: number;
   linkDistance?: number;
   isAutoRotate?: boolean;
 }
 
-import { GraphData, NodeObject as BaseNodeObject } from 'react-force-graph-2d';
-
-interface CustomNodeObject extends BaseNodeObject {
+interface CustomNodeObject {
   id: string;
   group: number;
   table: string;
-  tooltip?: string; // Added tooltip property
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  fx?: number | null;
+  fy?: number | null;
+  tooltip?: {
+    content: React.ReactNode;
+  };
 }
 
 interface CustomLinkObject {
-  source: string | CustomNodeObject;
-  target: string | CustomNodeObject;
+  source: CustomNodeObject | string;
+  target: CustomNodeObject | string;
   relationship: string;
   value: number;
 }
@@ -36,21 +41,6 @@ type ForceGraphData = {
   nodes: CustomNodeObject[];
   links: CustomLinkObject[];
 };
-
-type D3Node = CustomNodeObject & {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-};
-
-type D3Link = CustomLinkObject & {
-  source: D3Node;
-  target: D3Node;
-};
-
-type NodeCanvasObject = (node: D3Node, ctx: CanvasRenderingContext2D, globalScale?: number) => void;
-type LinkCanvasObject = (link: D3Link, ctx: CanvasRenderingContext2D, globalScale?: number) => void;
 
 export default function ForceGraphEditor({
   charge = -100,
@@ -63,6 +53,8 @@ export default function ForceGraphEditor({
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
   const [selectedRowDataMap, setSelectedRowDataMap] = useState<Map<string, Record<string, any>>>(new Map());
   const [graphData, setGraphData] = useState<ForceGraphData>(sampleData);
+  const [hoveredNode, setHoveredNode] = useState<CustomNodeObject | null>(null);
+  const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
 
   const zoomToNode = useCallback((node: CustomNodeObject) => {
     if (!fgRef.current) return;
@@ -198,7 +190,7 @@ export default function ForceGraphEditor({
     }
   }, [isAutoRotate]);
   
-  const paintNode = (node: D3Node, ctx: CanvasRenderingContext2D, globalScale: number) => {
+  const paintNode = (node: CustomNodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
     const isCurrentSelected = selectedNode && node.id === selectedNode.id;
@@ -313,7 +305,7 @@ export default function ForceGraphEditor({
     }
   };
 
-  const paintLink = (link: D3Link, ctx: CanvasRenderingContext2D) => {
+  const paintLink = (link: CustomLinkObject, ctx: CanvasRenderingContext2D) => {
     const { source, target } = link;
     if (!source || !target || typeof source.x === 'undefined' || typeof source.y === 'undefined' ||
         typeof target.x === 'undefined' || typeof target.y === 'undefined') {
@@ -452,12 +444,12 @@ export default function ForceGraphEditor({
     }
   };
 
-  const [hoveredNode, setHoveredNode] = useState<CustomNodeObject | null>(null);
-  const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-white">
       <Header />
+      
+      {/* Schema tooltip */}
       {hoveredNode?.tooltip && (
         <div
           className="fixed z-50 p-6 rounded-xl shadow-2xl transform -translate-x-1/2 -translate-y-1/2"
@@ -475,6 +467,8 @@ export default function ForceGraphEditor({
           {hoveredNode.tooltip.content}
         </div>
       )}
+
+      {/* Fullscreen preview modal */}
       {isPreviewFullscreen && selectedNode && (
         <div className="fixed inset-0 z-50 bg-[#2C2C2C] bg-opacity-95 backdrop-blur-sm flex items-center justify-center">
           <div className="w-11/12 h-5/6 bg-[#2C2C2C] rounded-lg border border-[#47FFDE] p-6 relative">
@@ -504,7 +498,10 @@ export default function ForceGraphEditor({
           </div>
         </div>
       )}
+
+      {/* Main content */}
       <div className="flex flex-1">
+        {/* Table list sidebar */}
         <TableListSidebar
           onTableSelect={(tableId) => {
             const node = graphData.nodes.find(n => n.id === tableId);
@@ -512,135 +509,121 @@ export default function ForceGraphEditor({
           }}
           selectedNode={selectedNode?.id}
         />
-        <div className="flex flex-col flex-1">
-          <div className="flex flex-1">
-            <div className="flex bg-white relative">
-              <div className="w-1/2 flex">
-                <TableListSidebar
-                  onTableSelect={(tableId) => {
-                    const node = graphData.nodes.find(n => n.id === tableId);
-                    if (node) handleNodeClick(node);
-                  }}
-                  selectedNode={selectedNode?.id}
-                />
-                <div className="flex-1 relative">
-                  {selectedNode && (
-                    <div className="absolute top-4 left-4 z-10">
-                      <Button
-                        onClick={handleBack}
-                        variant="ghost"
-                        className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                      >
-                        ← Back
-                      </Button>
-                    </div>
-                  )}
-                  {selectedNode && connectedNodes.length > 0 && (
-                    <div className="absolute top-4 right-4 flex gap-2 z-10">
-                      <Button
-                        onClick={handlePrev}
-                        variant="ghost"
-                        className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                      >
-                        <ArrowLeft className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        onClick={handleNext}
-                        variant="ghost"
-                        className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                      >
-                        <ArrowRight className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
-                  <ForceGraph2D
-                    ref={fgRef}
-                    graphData={graphData}
-                    nodeLabel="id"
-                    backgroundColor="#ffffff"
-                    onNodeClick={(node: CustomNodeObject) => {
-                      handleNodeClick(node);
-                    }}
-                    onBackgroundClick={() => {
-                      setSelectedRowDataMap(new Map());
-                    }}
-                    nodeCanvasObject={paintNode}
-                    onNodeHover={(node: CustomNodeObject | null) => {
-                      setHoveredNode(node);
-                    }}
-                    nodePointerAreaPaint={(node: D3Node, color: string, ctx: CanvasRenderingContext2D) => {
-                      if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
-                      ctx.beginPath();
-                      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-                      ctx.fillStyle = color;
-                      ctx.fill();
-                    }}
-                    linkCanvasObject={paintLink}
-                    linkColor={() => "transparent"}
-                    linkDirectionalArrowLength={0}
-                    width={window.innerWidth / 2 - 64}
-                    height={window.innerHeight - 64}
-                    d3Force={(engine: any) => {
-                      engine
-                        .force('charge', d3.forceManyBody().strength(charge))
-                        .force('collide', d3.forceCollide(nodeRadius * 1.5))
-                        .force('link', d3.forceLink().distance(linkDistance))
-                        .force('center', d3.forceCenter());
-                    }}
-                    d3VelocityDecay={0.3}
-                    enableNodeDrag={true}
-                    enableZoomPanInteraction={true}
-                    onNodeDragEnd={(node: CustomNodeObject) => {
-                      node.fx = node.x;
-                      node.fy = node.y;
-                    }}
-                    autoPauseRedraw={false}
-                  />
-                </div>
-              </div>
-              
-              <div className="w-1/2 border-l border-[#47FFDE] bg-[#2C2C2C]">
-                <div className="p-4">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-[#BBBBBB]">
-                      データプレビュー: {selectedNode?.table || ''}
-                    </h3>
-                    <Button
-                      onClick={() => setIsPreviewFullscreen(true)}
-                      variant="ghost"
-                      className="text-[#BBBBBB] hover:bg-[#3C3C3C]"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                      </svg>
-                    </Button>
-                  </div>
-                  {selectedNode && (
-                    <DataPreview 
-                      tableName={selectedNode.table} 
-                      onRowSelect={(data) => {
-                        setSelectedRowDataMap(prev => {
-                          const newMap = new Map(prev);
-                          newMap.set(selectedNode.id, data);
-                          return newMap;
-                        });
-                      }}
-                      selectedRowData={selectedRowDataMap.get(selectedNode.id)}
-                    />
-                  )}
-                </div>
-              </div>
+
+        {/* Force graph area */}
+        <div className="flex-1 relative">
+          {selectedNode && (
+            <div className="absolute top-4 left-4 z-10">
+              <Button
+                onClick={handleBack}
+                variant="ghost"
+                className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+              >
+                ← Back
+              </Button>
             </div>
+          )}
+          {selectedNode && connectedNodes.length > 0 && (
+            <div className="absolute top-4 right-4 flex gap-2 z-10">
+              <Button
+                onClick={handlePrev}
+                variant="ghost"
+                className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={handleNext}
+                variant="ghost"
+                className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+          <ForceGraph2D
+            ref={fgRef}
+            graphData={graphData}
+            nodeLabel="id"
+            backgroundColor="#ffffff"
+            onNodeClick={handleNodeClick}
+            onBackgroundClick={() => {
+              setSelectedRowDataMap(new Map());
+            }}
+            nodeCanvasObject={paintNode}
+            onNodeHover={setHoveredNode}
+            nodePointerAreaPaint={(node, color, ctx) => {
+              if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+              ctx.beginPath();
+              ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+              ctx.fillStyle = color;
+              ctx.fill();
+            }}
+            linkCanvasObject={paintLink}
+            linkColor={() => "transparent"}
+            linkDirectionalArrowLength={0}
+            width={window.innerWidth - 464} 
+            height={window.innerHeight - 64}
+            d3Force={(engine: any) => {
+              engine
+                .force('charge', d3.forceManyBody().strength(charge))
+                .force('collide', d3.forceCollide(nodeRadius * 1.5))
+                .force('link', d3.forceLink().distance(linkDistance))
+                .force('center', d3.forceCenter());
+            }}
+            d3VelocityDecay={0.3}
+            enableNodeDrag={true}
+            enableZoomPanInteraction={true}
+            onNodeDragEnd={(node) => {
+              if (node) {
+                node.fx = node.x;
+                node.fy = node.y;
+              }
+            }}
+            autoPauseRedraw={false}
+          />
+        </div>
+
+        {/* Data preview sidebar */}
+        <div className="w-[400px] border-l border-[#47FFDE] bg-[#2C2C2C]">
+          <div className="p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-[#BBBBBB]">
+                データプレビュー: {selectedNode?.table || ''}
+              </h3>
+              <Button
+                onClick={() => setIsPreviewFullscreen(true)}
+                variant="ghost"
+                className="text-[#BBBBBB] hover:bg-[#3C3C3C]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                </svg>
+              </Button>
+            </div>
+            {selectedNode && (
+              <DataPreview 
+                tableName={selectedNode.table} 
+                onRowSelect={(data) => {
+                  setSelectedRowDataMap(prev => {
+                    const newMap = new Map(prev);
+                    newMap.set(selectedNode.id, data);
+                    return newMap;
+                  });
+                }}
+                selectedRowData={selectedRowDataMap.get(selectedNode.id)}
+              />
+            )}
           </div>
         </div>
       </div>
