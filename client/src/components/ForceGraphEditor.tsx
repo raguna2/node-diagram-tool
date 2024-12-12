@@ -263,20 +263,28 @@ export default function ForceGraphEditor({
                 linkDirectionalArrowLength={0}
               />
             </div>
-            <div className="w-1/3 border-l border-[#47FFDE]">
+            <div 
+              className={`w-1/3 border-l border-[#47FFDE] transition-all duration-300 ease-in-out ${
+                selectedNode ? 'translate-x-0' : 'translate-x-full'
+              }`}
+            >
               <TableSchema node={selectedNode} />
             </div>
           </div>
-          <div className="h-[30vh] border-t border-[#47FFDE] p-4 bg-[#2C2C2C]">
-            {selectedNode && (
-              <div>
-                <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">データプレビュー: {selectedNode.table}</h3>
-                <div className="overflow-auto">
-                  {/* データテーブルの実装はここに追加予定 */}
-                  <p className="text-[#BBBBBB]">データベースからのデータをここに表示します</p>
-                </div>
+          <div 
+            className={`transition-all duration-300 ease-in-out ${
+              selectedNode ? 'h-[30vh]' : 'h-0'
+            } border-t border-[#47FFDE] bg-[#2C2C2C] overflow-hidden`}
+          >
+            <div className="p-4">
+              <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
+                データプレビュー: {selectedNode?.table}
+              </h3>
+              <div className="overflow-auto">
+                {/* データテーブルの実装はここに追加予定 */}
+                <p className="text-[#BBBBBB]">データベースからのデータをここに表示します</p>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

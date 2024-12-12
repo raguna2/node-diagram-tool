@@ -22,8 +22,10 @@ export default function TableSchema({ node }: TableSchemaProps) {
   ];
 
   return (
-    <Card className="p-6 bg-[#2C2C2C] text-[#BBBBBB] h-full overflow-auto">
-      <h2 className="text-xl font-semibold mb-4">テーブル: {node.table}</h2>
+    <Card className="p-6 bg-[#2C2C2C] text-[#BBBBBB] h-full overflow-auto transition-opacity duration-300 ease-in-out">
+      <h2 className="text-xl font-semibold mb-4 transition-transform duration-300 ease-in-out">
+        テーブル: {node.table}
+      </h2>
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-medium mb-2">スキーマ情報</h3>
