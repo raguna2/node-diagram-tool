@@ -398,7 +398,7 @@ export default function ForceGraphEditor({
                   handleNodeClick(node);
                 }}
                 onBackgroundClick={() => {
-                  setSelectedRowData(null);
+                  setSelectedRowDataMap(new Map());
                 }}
                 nodeCanvasObject={paintNode}
                 nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
@@ -436,7 +436,7 @@ export default function ForceGraphEditor({
                 selectedNode ? 'w-1/3 border-l border-[#47FFDE]' : 'w-0'
               }`}
             >
-              <TableSchema node={selectedNode} selectedRowData={selectedRowData} />
+              <TableSchema node={selectedNode} selectedRowData={selectedNode ? selectedRowDataMap.get(selectedNode.id) : null} />
             </div>
           </div>
           <div 
