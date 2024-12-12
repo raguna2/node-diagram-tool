@@ -10,7 +10,7 @@ interface TableSchemaProps {
   selectedRowData?: Record<string, any> | null;
 }
 
-export function getSchemaContent(tableName: string) {
+export function getSchemaContent(tableName: string, selectedRowData?: Record<string, any> | null) {
   // テーブルごとのスキーマ定義
   const schemas: { [key: string]: Array<{ name: string; type: string; isPrimary?: boolean; isNullable?: boolean; isUnique?: boolean; defaultValue?: string }> } = {
     users: [
@@ -93,6 +93,6 @@ export function getSchemaContent(tableName: string) {
   );
 }
 
-export default function TableSchema({ node }: { node: { table: string } }) {
-  return getSchemaContent(node.table);
+export default function TableSchema({ node, selectedRowData }: TableSchemaProps) {
+  return getSchemaContent(node.table, selectedRowData);
 }
