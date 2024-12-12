@@ -10,7 +10,7 @@ import { sampleTableData } from "@/lib/sampleTableData";
 
 interface DataPreviewProps {
   tableName: string | undefined;
-  onRowSelect?: (data: Record<string, any>, tableName: string) => void;
+  onRowSelect?: (data: Record<string, any>) => void;
   selectedRowData?: Record<string, any> | null;
 }
 
@@ -44,7 +44,7 @@ export default function DataPreview({ tableName, onRowSelect, selectedRowData }:
                   ? 'outline outline-2 outline-[#7B61FF]' 
                   : ''
               }`}
-              onClick={() => onRowSelect?.(row, tableName)}
+              onClick={() => onRowSelect?.(row)}
             >
               {columns.map((column) => (
                 <TableCell

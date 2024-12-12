@@ -5,7 +5,6 @@ interface TableData {
 export const sampleTableData: TableData = {
   contact_relation: Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
-    visit_card_id: i + 1, // 1対1の関係を表現
     uuid: `cr-${crypto.randomUUID().slice(0, 8)}`,
     tel: `090-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`,
     fax: `03-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -19,7 +18,6 @@ export const sampleTableData: TableData = {
   
   visit_card: Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
-    contact_relation_id: i + 1, // 1対1の関係を表現
     company_name: `株式会社サンプル${i + 1}`,
     department: `営業部${Math.floor(Math.random() * 3) + 1}課`,
     position: ['部長', '課長', '主任', '担当'][Math.floor(Math.random() * 4)],
@@ -42,7 +40,6 @@ export const sampleTableData: TableData = {
 
   lbc_relation: Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
-    lbc_id: i + 1, // 1対1の関係を表現
     relation_type: ['主担当', '副担当', '協力', '情報共有'][Math.floor(Math.random() * 4)],
     start_date: new Date(Date.now() - Math.random() * 10000000000).toISOString(),
     end_date: new Date(Date.now() + Math.random() * 10000000000).toISOString(),
@@ -53,7 +50,6 @@ export const sampleTableData: TableData = {
 
   lbc: Array.from({ length: 10 }, (_, i) => ({
     id: i + 1,
-    lbc_relation_id: i + 1, // 1対1の関係を表現
     name: `取引先${i + 1}`,
     category: ['A', 'B', 'C'][Math.floor(Math.random() * 3)],
     priority: Math.floor(Math.random() * 5) + 1,
