@@ -19,6 +19,7 @@ export default function ForceGraphEditor({
   const fgRef = useRef<any>();
   const nodeRadius = 12;
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
+  const [graphData, setGraphData] = useState(sampleData);
 
   useEffect(() => {
     if (fgRef.current && isAutoRotate) {
@@ -44,16 +45,22 @@ export default function ForceGraphEditor({
     setSelectedNode(node);
     if (fgRef.current) {
       const fg = fgRef.current;
-      
-      // 選択したノードの位置を保存
       const nodeX = node.x || 0;
       const nodeY = node.y || 0;
       
-      // アニメーションでズームイン
       setTimeout(() => {
         fg.centerAt(nodeX, nodeY, 1000);
         fg.zoom(4, 1000);
       }, 400);
+    }
+  }, []);
+
+  const handleBack = useCallback(() => {
+    setSelectedNode(null);
+    if (fgRef.current) {
+      const fg = fgRef.current;
+      fg.centerAt(0, 0, 1000);
+      fg.zoom(1, 1000);
     }
   }, []);
 
@@ -200,13 +207,7 @@ export default function ForceGraphEditor({
           <div className="flex flex-1">
             <div className="w-2/3 bg-white relative">
               <button
-                onClick={() => {
-                  setSelectedNode(null);
-                  if (fgRef.current) {
-                    fgRef.current.graphData(sampleData);
-                    fgRef.current.zoomToFit(400);
-                  }
-                }}
+                onClick={handleBack}
                 className="absolute top-4 left-4 px-3 py-1 text-sm bg-[#2C2C2C] text-[#BBBBBB] rounded-md hover:bg-[#3C3C3C] transition-colors z-10"
               >
                 ← Back
