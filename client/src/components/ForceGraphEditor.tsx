@@ -59,12 +59,12 @@ export default function ForceGraphEditor({
 }: ForceGraphProps) {
   const fgRef = useRef<any>();
   const nodeRadius = 12;
-  const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
+  const [selectedNode, setSelectedNode] = useState<CustomNodeObject | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
   const [selectedRowDataMap, setSelectedRowDataMap] = useState<Map<string, Record<string, any>>>(new Map());
   const [graphData, setGraphData] = useState<ForceGraphData>(sampleData);
 
-  const zoomToNode = useCallback((node: NodeObject) => {
+  const zoomToNode = useCallback((node: CustomNodeObject) => {
     if (!fgRef.current) return;
     const fg = fgRef.current;
     const nodeX = node.x || 0;
@@ -80,7 +80,7 @@ export default function ForceGraphEditor({
     }, 50);
   }, []);
 
-  const handleNodeClick = useCallback((node: NodeObject) => {
+  const handleNodeClick = useCallback((node: CustomNodeObject) => {
     // 同じノードをクリックした場合は何もしない
     if (selectedNode?.id === node.id) return;
     
