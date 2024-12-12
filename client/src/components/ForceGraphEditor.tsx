@@ -460,14 +460,16 @@ export default function ForceGraphEditor({
       <Header />
       {hoveredNode?.tooltip && (
         <div
-          className="fixed z-50 p-4 rounded-lg shadow-lg transform -translate-x-1/2 -translate-y-1/2"
+          className="fixed z-50 p-6 rounded-xl shadow-2xl transform -translate-x-1/2 -translate-y-1/2"
           style={{
-            left: hoveredNode.tooltip.x,
-            top: hoveredNode.tooltip.y,
-            backgroundColor: 'rgba(44, 44, 44, 0.95)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(71, 255, 222, 0.3)',
-            minWidth: '200px',
+            left: '50%',
+            top: '50%',
+            backgroundColor: 'rgba(44, 44, 44, 0.75)',
+            backdropFilter: 'blur(16px)',
+            border: '1px solid rgba(71, 255, 222, 0.2)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            minWidth: '300px',
+            WebkitBackdropFilter: 'blur(16px)',
           }}
         >
           {hoveredNode.tooltip.content}
