@@ -18,15 +18,30 @@ export default function TableListSidebar({ onTableSelect, selectedNode }: TableL
 
   return (
     <div className="w-64 h-full bg-[#2C2C2C] border-r border-[#47FFDE] flex flex-col">
-      <div className="p-4 border-b border-[#47FFDE]">
-        <h2 className="text-[#BBBBBB] text-lg font-semibold mb-4">テーブル</h2>
-        <Input
-          type="search"
-          placeholder="テーブルを検索..."
-          className="bg-[#49484D] border-[#47FFDE] text-[#BBBBBB] placeholder:text-[#BBBBBB]"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      <div className="p-4 border-b border-[#47FFDE]/20">
+        <h2 className="text-[#BBBBBB] font-medium text-sm uppercase tracking-wider mb-3">テーブル一覧</h2>
+        <div className="relative">
+          <Input
+            type="search"
+            placeholder="テーブルを検索..."
+            className="bg-[#1C1C1C] border-[#47FFDE]/20 text-[#BBBBBB] placeholder:text-[#666666] h-8 pl-8 text-sm focus:border-[#47FFDE] transition-colors"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <svg
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666666]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
       </div>
       <ScrollArea className="flex-1">
         <div className="p-4">
@@ -34,10 +49,10 @@ export default function TableListSidebar({ onTableSelect, selectedNode }: TableL
             <button
               key={table.id}
               onClick={() => onTableSelect?.(table.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${
+              className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-sm transition-all ${
                 selectedNode === table.id
-                  ? 'bg-[#47FFDE] text-[#2C2C2C]'
-                  : 'text-[#BBBBBB] hover:bg-[#3C3C3C]'
+                  ? 'bg-[#47FFDE]/10 text-[#47FFDE] border-l-2 border-[#47FFDE]'
+                  : 'text-[#BBBBBB] hover:bg-[#3C3C3C]/50 border-l-2 border-transparent'
               }`}
             >
               <Database className="h-4 w-4" />
