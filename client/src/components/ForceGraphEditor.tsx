@@ -48,10 +48,14 @@ export default function ForceGraphEditor({
       const nodeX = node.x || 0;
       const nodeY = node.y || 0;
       
+      // 即座にズームアウトして、ダイナミックなズームイン効果を作成
+      fg.zoom(0.5, 0);
+      
+      // 少し遅れて中央に移動しながらズームイン
       setTimeout(() => {
-        fg.centerAt(nodeX, nodeY, 1000);
-        fg.zoom(4, 1000);
-      }, 400);
+        fg.centerAt(nodeX, nodeY, 800);
+        fg.zoom(6, 800);
+      }, 100);
     }
   }, []);
 
@@ -59,8 +63,14 @@ export default function ForceGraphEditor({
     setSelectedNode(null);
     if (fgRef.current) {
       const fg = fgRef.current;
-      fg.centerAt(0, 0, 1000);
-      fg.zoom(1, 1000);
+      // 即座に少しズームアウト
+      fg.zoom(0.5, 0);
+      
+      // スムーズに元の位置に戻る
+      setTimeout(() => {
+        fg.centerAt(0, 0, 800);
+        fg.zoom(1, 800);
+      }, 100);
     }
   }, []);
 
