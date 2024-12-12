@@ -220,7 +220,7 @@ export default function ForceGraphEditor({
       <div className="flex flex-1">
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
-            <div className="w-2/3 bg-white relative">
+            <div className="flex-1 bg-white relative">
               <button
                 onClick={handleBack}
                 className="absolute top-4 left-4 px-3 py-1 text-sm bg-[#2C2C2C] text-[#BBBBBB] rounded-md hover:bg-[#3C3C3C] transition-colors z-10"
@@ -232,7 +232,7 @@ export default function ForceGraphEditor({
                 graphData={sampleData}
                 nodeLabel="id"
                 backgroundColor="#ffffff"
-                width={window.innerWidth * 0.66}
+                width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
                 height={(window.innerHeight - 64) * 0.7}
                 d3Force={(engine) => {
                   engine
