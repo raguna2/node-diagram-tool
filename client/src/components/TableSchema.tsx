@@ -7,6 +7,7 @@ interface NodeObject {
 
 interface TableSchemaProps {
   node: NodeObject | null;
+  selectedRowData?: Record<string, any> | null;
 }
 
 export default function TableSchema({ node }: TableSchemaProps) {
@@ -81,6 +82,7 @@ export default function TableSchema({ node }: TableSchemaProps) {
                 <th className="pb-2">カラム名</th>
                 <th className="pb-2">データ型</th>
                 <th className="pb-2">制約</th>
+                <th className="pb-2">選択中の値</th>
               </tr>
             </thead>
             <tbody>
@@ -93,6 +95,13 @@ export default function TableSchema({ node }: TableSchemaProps) {
                     {column.isUnique && 'UNIQUE '}
                     {column.isNullable === false && 'NOT NULL '}
                     {column.defaultValue && `DEFAULT ${column.defaultValue}`}
+                  </td>
+                  <td className="py-2">
+                    {selectedRowData && (
+                      typeof selectedRowData[column.name] === 'number'
+                        ? selectedRowData[column.name].toLocaleString()
+                        : String(selectedRowData[column.name] || '')
+                    )}
                   </td>
                 </tr>
               ))}

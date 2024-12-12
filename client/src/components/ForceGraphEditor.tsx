@@ -37,6 +37,7 @@ export default function ForceGraphEditor({
   const fgRef = useRef<any>();
   const nodeRadius = 12;
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
+  const [selectedRowData, setSelectedRowData] = useState<Record<string, any> | null>(null);
   const [graphData, setGraphData] = useState(sampleData);
 
   const zoomToNode = useCallback((node: NodeObject) => {
@@ -208,6 +209,30 @@ export default function ForceGraphEditor({
     ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
     ctx.shadowBlur = 2;
     ctx.fillText(node.table || '', node.x, node.y + nodeRadius * 3);
+    
+    // Draw tooltip if we have selected row data
+    if (selectedRowData && node.table === selectedNode?.table) {
+      const tooltipText = `ID: ${selectedRowData.id}`;
+      const tooltipWidth = ctx.measureText(tooltipText).width + 10;
+      const tooltipHeight = 20;
+      const tooltipX = node.x - tooltipWidth / 2;
+      const tooltipY = node.y - nodeRadius * 4;
+
+      // Draw tooltip background
+      ctx.fillStyle = '#2C2C2C';
+      ctx.beginPath();
+      ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 4);
+      ctx.fill();
+      ctx.strokeStyle = '#47FFDE';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Draw tooltip text
+      ctx.fillStyle = '#BBBBBB';
+      ctx.textAlign = 'center';
+      ctx.fillText(tooltipText, node.x, tooltipY + 14);
+    }
+    
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
   };
@@ -349,7 +374,7 @@ export default function ForceGraphEditor({
                 selectedNode ? 'w-1/3 border-l border-[#47FFDE]' : 'w-0'
               }`}
             >
-              <TableSchema node={selectedNode} />
+              <TableSchema node={selectedNode} selectedRowData={selectedRowData} />
             </div>
           </div>
           <div 
@@ -361,7 +386,10 @@ export default function ForceGraphEditor({
               <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
                 データプレビュー: {selectedNode?.table}
               </h3>
-              <DataPreview tableName={selectedNode?.table} />
+              <DataPreview 
+                tableName={selectedNode?.table} 
+                onRowSelect={setSelectedRowData}
+              />
             </div>
           </div>
         </div>

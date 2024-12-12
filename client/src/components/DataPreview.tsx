@@ -10,9 +10,10 @@ import { sampleTableData } from "@/lib/sampleTableData";
 
 interface DataPreviewProps {
   tableName: string | undefined;
+  onRowSelect?: (data: Record<string, any>) => void;
 }
 
-export default function DataPreview({ tableName }: DataPreviewProps) {
+export default function DataPreview({ tableName, onRowSelect }: DataPreviewProps) {
   if (!tableName || !sampleTableData[tableName]) return null;
 
   const data = sampleTableData[tableName];
@@ -35,7 +36,11 @@ export default function DataPreview({ tableName }: DataPreviewProps) {
         </TableHeader>
         <TableBody>
           {data.map((row, i) => (
-            <TableRow key={i} className="hover:bg-[#3C3C3C]">
+            <TableRow 
+              key={i} 
+              className="hover:bg-[#3C3C3C] cursor-pointer"
+              onClick={() => onRowSelect?.(row)}
+            >
               {columns.map((column) => (
                 <TableCell
                   key={`${i}-${column}`}
