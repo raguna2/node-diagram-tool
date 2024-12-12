@@ -328,8 +328,8 @@ export default function ForceGraphEditor({
     gradient.addColorStop(1, 'rgba(100, 116, 139, 0.1)');
     
     ctx.beginPath();
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
+    ctx.moveTo(source.x, source.y);
+    ctx.lineTo(target.x, target.y);
     
     // Different patterns based on relationship type
     switch (link.relationship) {
