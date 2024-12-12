@@ -163,7 +163,42 @@ export default function ForceGraphEditor({
     // 選択されたノードがある場合、そのノード以外は描画しない
     if (selectedNode && node.id !== selectedNode.id) return;
 
-    // Draw glow effect
+    // Draw enhanced glow effect
+    const time = performance.now() / 1000;
+    const pulseSize = 1 + Math.sin(time * 2) * 0.1; // Pulsating effect
+    
+    // Outer glow for selected state
+    if (selectedNode && node.id === selectedNode.id) {
+      const outerGlow = ctx.createRadialGradient(
+        node.x, node.y, nodeRadius * 1.5,
+        node.x, node.y, nodeRadius * 3 * pulseSize
+      );
+      outerGlow.addColorStop(0, 'rgba(123, 97, 255, 0.2)');
+      outerGlow.addColorStop(1, 'rgba(123, 97, 255, 0)');
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, nodeRadius * 3 * pulseSize, 0, 2 * Math.PI);
+      ctx.fillStyle = outerGlow;
+      ctx.fill();
+
+      // Draw data indicator if row is selected
+      if (selectedRowData) {
+        // Animated ring
+        const ringSize = 1 + Math.sin(time * 3) * 0.05;
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, nodeRadius * 1.8 * ringSize, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#7B61FF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw ID label
+        ctx.font = 'bold 12px Arial';
+        ctx.fillStyle = '#2C2C2C';
+        ctx.textAlign = 'center';
+        ctx.fillText(`ID: ${selectedRowData.id}`, node.x, node.y - nodeRadius * 2.5);
+      }
+    }
+
+    // Base glow
     const gradient = ctx.createRadialGradient(
       node.x, node.y, nodeRadius * 0.5,
       node.x, node.y, nodeRadius * 2
@@ -287,21 +322,7 @@ export default function ForceGraphEditor({
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
             <div className="flex-1 bg-white relative">
-              <Tooltip
-                id="node-tooltip"
-                className="bg-[#2C2C2C] border border-[#47FFDE] text-[#BBBBBB] p-2 rounded"
-                place="top"
-                variant="dark"
-                content={
-                  selectedRowData 
-                    ? `ID: ${selectedRowData.id}`
-                    : selectedNode 
-                      ? 'データを選択してください'
-                      : ''
-                }
-                isOpen={!!selectedNode}
-                float={true}
-              />
+              
               <div className="absolute top-4 left-4 z-10">
                 <Button
                   onClick={handleBack}
