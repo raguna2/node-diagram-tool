@@ -60,10 +60,13 @@ export default function ForceGraphEditor({
   }, []);
 
   const handleNodeClick = useCallback((node: NodeObject) => {
+    // 同じノードをクリックした場合は何もしない
+    if (selectedNode?.id === node.id) return;
+    
     setSelectedNode(node);
     setSelectedRowData(null); // ノードを切り替えた時は選択をリセット
     zoomToNode(node);
-  }, [zoomToNode]);
+  }, [selectedNode, zoomToNode]);
 
   // 選択されたノードの接続先ノードを取得
   const connectedNodes = useMemo(() => {
@@ -161,8 +164,12 @@ export default function ForceGraphEditor({
   const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
-    // すべてのノードを描画するが、選択されたノードには特別な効果を付ける
     const isSelected = selectedNode && node.id === selectedNode.id;
+    const currentZoom = fgRef.current?.zoom() || 1;
+    const isZoomedIn = currentZoom > 2;
+
+    // ズームイン時は選択されたノードのみ表示
+    if (isZoomedIn && !isSelected) return;
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
@@ -263,8 +270,11 @@ export default function ForceGraphEditor({
       return;
     }
     
-    // 選択されたノードがある場合、そのノードに関連するエッジのみ描画
-    if (selectedNode && start.id !== selectedNode.id && end.id !== selectedNode.id) {
+    const currentZoom = fgRef.current?.zoom() || 1;
+    const isZoomedIn = currentZoom > 2;
+
+    // ズームイン時は選択されたノードに関連するエッジのみ表示
+    if (isZoomedIn && selectedNode && start.id !== selectedNode.id && end.id !== selectedNode.id) {
       return;
     }
     
