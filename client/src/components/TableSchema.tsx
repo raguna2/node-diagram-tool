@@ -15,56 +15,50 @@ export default function TableSchema({ node, selectedRowData = null }: TableSchem
 
   // テーブルごとのスキーマ定義
   const schemas: { [key: string]: Array<{ name: string; type: string; isPrimary?: boolean; isNullable?: boolean; isUnique?: boolean; defaultValue?: string }> } = {
-    contact_relation: [
-      { name: 'id', type: 'int', isPrimary: true },
-      { name: 'uuid', type: 'uuid', isUnique: true },
-      { name: 'tel', type: 'char' },
-      { name: 'fax', type: 'char' },
-      { name: 'created_at', type: 'datetime' },
-      { name: 'created_by', type: 'char' },
-      { name: 'created_by_id', type: 'int' },
-      { name: 'updated_at', type: 'datetime' },
-      { name: 'updated_by', type: 'char' },
-      { name: 'updated_by_id', type: 'int' }
+    users: [
+      { name: 'id', type: 'integer', isPrimary: true },
+      { name: 'name', type: 'text', isNullable: false },
+      { name: 'email', type: 'text', isNullable: false, isUnique: true },
+      { name: 'created_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' },
+      { name: 'updated_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' }
     ],
-    visit_card: [
-      { name: 'id', type: 'int', isPrimary: true },
-      { name: 'company_name', type: 'varchar(255)' },
-      { name: 'department', type: 'varchar(255)' },
-      { name: 'position', type: 'varchar(100)' },
-      { name: 'person_name', type: 'varchar(255)' },
-      { name: 'email', type: 'varchar(255)', isUnique: true },
-      { name: 'created_at', type: 'datetime' },
-      { name: 'updated_at', type: 'datetime' }
+    projects: [
+      { name: 'id', type: 'integer', isPrimary: true },
+      { name: 'name', type: 'text', isNullable: false },
+      { name: 'description', type: 'text', isNullable: true },
+      { name: 'status', type: 'text', isNullable: false, defaultValue: "'active'" },
+      { name: 'owner_id', type: 'integer', isNullable: false },
+      { name: 'created_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' },
+      { name: 'updated_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' }
     ],
-    contact: [
-      { name: 'id', type: 'int', isPrimary: true },
-      { name: 'contact_date', type: 'datetime' },
-      { name: 'contact_type', type: 'varchar(50)' },
-      { name: 'summary', type: 'text' },
-      { name: 'details', type: 'text' },
-      { name: 'next_action', type: 'varchar(255)' },
-      { name: 'created_at', type: 'datetime' },
-      { name: 'updated_at', type: 'datetime' }
+    tasks: [
+      { name: 'id', type: 'integer', isPrimary: true },
+      { name: 'title', type: 'text', isNullable: false },
+      { name: 'description', type: 'text', isNullable: true },
+      { name: 'status', type: 'text', isNullable: false, defaultValue: "'todo'" },
+      { name: 'priority', type: 'text', isNullable: false, defaultValue: "'medium'" },
+      { name: 'project_id', type: 'integer', isNullable: false },
+      { name: 'assignee_id', type: 'integer', isNullable: true },
+      { name: 'created_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' },
+      { name: 'updated_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' }
     ],
-    lbc_relation: [
-      { name: 'id', type: 'int', isPrimary: true },
-      { name: 'relation_type', type: 'varchar(50)' },
-      { name: 'start_date', type: 'datetime' },
-      { name: 'end_date', type: 'datetime' },
-      { name: 'status', type: 'varchar(20)' },
-      { name: 'created_at', type: 'datetime' },
-      { name: 'updated_at', type: 'datetime' }
+    comments: [
+      { name: 'id', type: 'integer', isPrimary: true },
+      { name: 'content', type: 'text', isNullable: false },
+      { name: 'task_id', type: 'integer', isNullable: false },
+      { name: 'user_id', type: 'integer', isNullable: false },
+      { name: 'created_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' },
+      { name: 'updated_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' }
     ],
-    lbc: [
-      { name: 'id', type: 'int', isPrimary: true },
-      { name: 'name', type: 'varchar(255)' },
-      { name: 'category', type: 'char(1)' },
-      { name: 'priority', type: 'int' },
-      { name: 'annual_revenue', type: 'bigint' },
-      { name: 'employee_count', type: 'int' },
-      { name: 'created_at', type: 'datetime' },
-      { name: 'updated_at', type: 'datetime' }
+    attachments: [
+      { name: 'id', type: 'integer', isPrimary: true },
+      { name: 'filename', type: 'text', isNullable: false },
+      { name: 'file_path', type: 'text', isNullable: false },
+      { name: 'file_size', type: 'integer', isNullable: false },
+      { name: 'mime_type', type: 'text', isNullable: false },
+      { name: 'task_id', type: 'integer', isNullable: false },
+      { name: 'uploaded_by', type: 'integer', isNullable: false },
+      { name: 'created_at', type: 'timestamp', isNullable: false, defaultValue: 'now()' }
     ]
   };
 
