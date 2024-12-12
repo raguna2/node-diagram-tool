@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { sampleData } from "@/lib/sampleData";
 import * as d3 from "d3-force";
+import { Tooltip } from 'react-tooltip';
 import Header from "@/components/Header";
 import TableSchema from "@/components/TableSchema";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -210,35 +211,7 @@ export default function ForceGraphEditor({
     ctx.shadowBlur = 2;
     ctx.fillText(node.table || '', node.x, node.y + nodeRadius * 3);
     
-    // Draw tooltip if we have selected row data
-    if (selectedRowData && node.table === selectedNode?.table) {
-      const tooltipText = `ID: ${selectedRowData.id}`;
-      const tooltipWidth = ctx.measureText(tooltipText).width + 10;
-      const tooltipHeight = 20;
-      const tooltipX = node.x - tooltipWidth / 2;
-      const tooltipY = node.y - nodeRadius * 4;
-
-      // Draw tooltip background with arrow
-      ctx.fillStyle = '#2C2C2C';
-      ctx.beginPath();
-      ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 4);
-      
-      // Draw arrow
-      ctx.moveTo(node.x, tooltipY + tooltipHeight);
-      ctx.lineTo(node.x - 6, tooltipY + tooltipHeight - 6);
-      ctx.lineTo(node.x + 6, tooltipY + tooltipHeight - 6);
-      ctx.closePath();
-      
-      ctx.fill();
-      ctx.strokeStyle = '#47FFDE';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // Draw tooltip text
-      ctx.fillStyle = '#BBBBBB';
-      ctx.textAlign = 'center';
-      ctx.fillText(tooltipText, node.x, tooltipY + 14);
-    }
+    // We don't need to draw tooltip here as we'll use react-tooltip
     
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
@@ -313,6 +286,15 @@ export default function ForceGraphEditor({
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
             <div className="flex-1 bg-white relative">
+              {selectedNode && selectedRowData && (
+                <Tooltip
+                  id="node-tooltip"
+                  className="bg-[#2C2C2C] border border-[#47FFDE] text-[#BBBBBB] p-2 rounded"
+                  place="top"
+                  content={`ID: ${selectedRowData.id}`}
+                  isOpen={true}
+                />
+              )}
               <div className="absolute top-4 left-4 z-10">
                 <Button
                   onClick={handleBack}
@@ -345,6 +327,14 @@ export default function ForceGraphEditor({
                 graphData={graphData}
                 nodeLabel="id"
                 backgroundColor="#ffffff"
+                onNodeClick={(node: NodeObject) => {
+                  handleNodeClick(node);
+                  // Set data-tooltip-id dynamically
+                  const nodeElement = document.querySelector(`[data-node-id="${node.id}"]`);
+                  if (nodeElement) {
+                    nodeElement.setAttribute('data-tooltip-id', 'node-tooltip');
+                  }
+                }}
                 width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
                 height={(window.innerHeight - 64) * 0.7}
                 d3Force={(engine: any) => {
