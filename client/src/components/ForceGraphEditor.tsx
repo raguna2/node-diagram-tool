@@ -218,10 +218,17 @@ export default function ForceGraphEditor({
       const tooltipX = node.x - tooltipWidth / 2;
       const tooltipY = node.y - nodeRadius * 4;
 
-      // Draw tooltip background
+      // Draw tooltip background with arrow
       ctx.fillStyle = '#2C2C2C';
       ctx.beginPath();
       ctx.roundRect(tooltipX, tooltipY, tooltipWidth, tooltipHeight, 4);
+      
+      // Draw arrow
+      ctx.moveTo(node.x, tooltipY + tooltipHeight);
+      ctx.lineTo(node.x - 6, tooltipY + tooltipHeight - 6);
+      ctx.lineTo(node.x + 6, tooltipY + tooltipHeight - 6);
+      ctx.closePath();
+      
       ctx.fill();
       ctx.strokeStyle = '#47FFDE';
       ctx.lineWidth = 1;
@@ -389,6 +396,7 @@ export default function ForceGraphEditor({
               <DataPreview 
                 tableName={selectedNode?.table} 
                 onRowSelect={setSelectedRowData}
+                selectedRowData={selectedRowData}
               />
             </div>
           </div>

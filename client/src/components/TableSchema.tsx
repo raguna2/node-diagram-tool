@@ -81,7 +81,6 @@ export default function TableSchema({ node, selectedRowData }: TableSchemaProps)
               <tr className="text-left border-b border-[#47FFDE]">
                 <th className="pb-2">カラム名</th>
                 <th className="pb-2">データ型</th>
-                <th className="pb-2">制約</th>
                 <th className="pb-2">選択中の値</th>
               </tr>
             </thead>
@@ -90,12 +89,6 @@ export default function TableSchema({ node, selectedRowData }: TableSchemaProps)
                 <tr key={column.name} className="border-b border-[#47FFDE]/20">
                   <td className="py-2">{column.name}</td>
                   <td className="py-2">{column.type}</td>
-                  <td className="py-2">
-                    {column.isPrimary && 'PRIMARY KEY '}
-                    {column.isUnique && 'UNIQUE '}
-                    {column.isNullable === false && 'NOT NULL '}
-                    {column.defaultValue && `DEFAULT ${column.defaultValue}`}
-                  </td>
                   <td className="py-2">
                     {selectedRowData && (
                       typeof selectedRowData[column.name] === 'number'

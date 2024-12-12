@@ -11,6 +11,7 @@ import { sampleTableData } from "@/lib/sampleTableData";
 interface DataPreviewProps {
   tableName: string | undefined;
   onRowSelect?: (data: Record<string, any>) => void;
+  selectedRowData?: Record<string, any> | null;
 }
 
 export default function DataPreview({ tableName, onRowSelect }: DataPreviewProps) {
@@ -38,7 +39,7 @@ export default function DataPreview({ tableName, onRowSelect }: DataPreviewProps
           {data.map((row, i) => (
             <TableRow 
               key={i} 
-              className="hover:bg-[#3C3C3C] cursor-pointer"
+              className={`hover:bg-[#3C3C3C] cursor-pointer ${row === selectedRowData ? 'bg-[#7B61FF]' : ''}`}
               onClick={() => onRowSelect?.(row)}
             >
               {columns.map((column) => (
