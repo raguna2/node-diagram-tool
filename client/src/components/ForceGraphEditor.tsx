@@ -297,10 +297,21 @@ export default function ForceGraphEditor({
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
 
-    // Add hover area for tooltip
-    const tooltipContent = getSchemaContent(node.table);
-    if (tooltipContent) {
-      node.tooltip = tooltipContent;
+    // Create a div for schema info
+    if (globalScale >= 1 && node.table) {
+      const schemaContent = getSchemaContent(node.table);
+      if (schemaContent) {
+        // Calculate position for the modal
+        const modalX = node.x + nodeRadius * 2;
+        const modalY = node.y - nodeRadius * 2;
+        
+        // Save the position and content for the modal
+        node.tooltip = {
+          x: modalX,
+          y: modalY,
+          content: schemaContent
+        };
+      }
     }
   };
 
@@ -443,9 +454,25 @@ export default function ForceGraphEditor({
     }
   };
 
+  const [hoveredNode, setHoveredNode] = useState<CustomNodeObject | null>(null);
+
   return (
     <div className="flex flex-col h-screen">
       <Header />
+      {hoveredNode?.tooltip && (
+        <div
+          className="fixed z-50 p-4 rounded-lg shadow-lg"
+          style={{
+            left: hoveredNode.tooltip.x,
+            top: hoveredNode.tooltip.y,
+            backgroundColor: 'rgba(44, 44, 44, 0.8)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(71, 255, 222, 0.2)',
+          }}
+        >
+          {hoveredNode.tooltip.content}
+        </div>
+      )}
       <div className="flex flex-1">
         <TableListSidebar
           onTableSelect={(tableId) => {
@@ -499,7 +526,10 @@ export default function ForceGraphEditor({
                   setSelectedRowDataMap(new Map());
                 }}
                 nodeCanvasObject={paintNode}
-                nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
+                onNodeHover={(node: CustomNodeObject | null) => {
+                  setHoveredNode(node);
+                }}
+                nodePointerAreaPaint={(node: D3Node, color: string, ctx: CanvasRenderingContext2D) => {
                   if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
                   ctx.beginPath();
                   ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
