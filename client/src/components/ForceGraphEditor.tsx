@@ -20,17 +20,35 @@ interface ForceGraphProps {
 interface NodeObject {
   x?: number;
   y?: number;
+  fx?: number;
+  fy?: number;
   id: string;
   group: number;
   table: string;
+  vx?: number;
+  vy?: number;
 }
 
 interface LinkObject {
-  source: NodeObject | string;
-  target: NodeObject | string;
+  source: NodeObject;
+  target: NodeObject;
   relationship: string;
   value: number;
 }
+
+type D3Node = NodeObject & {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+};
+
+type D3Link = {
+  source: D3Node;
+  target: D3Node;
+  relationship: string;
+  value: number;
+};
 
 export default function ForceGraphEditor({
   charge = -100,
@@ -178,8 +196,8 @@ export default function ForceGraphEditor({
     }
   }, [isAutoRotate]);
   
-  const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
-    if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+  const paintNode = (node: D3Node, ctx: CanvasRenderingContext2D) => {
+    if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
     const isCurrentSelected = selectedNode && node.id === selectedNode.id;
     const isEverSelected = selectedNodes.has(node.id);
@@ -280,12 +298,10 @@ export default function ForceGraphEditor({
     ctx.shadowBlur = 0;
   };
 
-  const paintLink = (link: LinkObject, ctx: CanvasRenderingContext2D) => {
-    const start = typeof link.source === 'string' ? graphData.nodes.find(n => n.id === link.source) : link.source;
-    const end = typeof link.target === 'string' ? graphData.nodes.find(n => n.id === link.target) : link.target;
-    
-    if (!start || !end || typeof start.x === 'undefined' || typeof start.y === 'undefined' ||
-        typeof end.x === 'undefined' || typeof end.y === 'undefined') {
+  const paintLink = (link: D3Link, ctx: CanvasRenderingContext2D) => {
+    const { source, target } = link;
+    if (!source || !target || typeof source.x === 'undefined' || typeof source.y === 'undefined' ||
+        typeof target.x === 'undefined' || typeof target.y === 'undefined') {
       return;
     }
     
