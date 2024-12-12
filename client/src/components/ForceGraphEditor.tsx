@@ -1,9 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { sampleData } from "@/lib/sampleData";
 import * as d3 from "d3-force";
 import Header from "@/components/Header";
 import TableSchema from "@/components/TableSchema";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ForceGraphProps {
   charge?: number;
@@ -20,6 +22,40 @@ export default function ForceGraphEditor({
   const nodeRadius = 12;
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
   const [graphData, setGraphData] = useState(sampleData);
+
+  // 選択されたノードの接続先ノードを取得
+  const connectedNodes = useMemo(() => {
+    if (!selectedNode) return [];
+    const connections = graphData.links.filter(
+      link => link.source === selectedNode.id || link.target === selectedNode.id
+    );
+    return connections.map(link => {
+      const connectedId = link.source === selectedNode.id ? link.target : link.source;
+      return graphData.nodes.find(node => node.id === connectedId);
+    }).filter((node): node is NodeObject => node !== undefined);
+  }, [selectedNode, graphData]);
+
+  // 現在のノードのインデックスを取得
+  const currentNodeIndex = useMemo(() => {
+    if (!selectedNode || connectedNodes.length === 0) return -1;
+    return connectedNodes.findIndex(node => node.id === selectedNode.id);
+  }, [selectedNode, connectedNodes]);
+
+  // 次のノードに移動
+  const handleNext = useCallback(() => {
+    if (connectedNodes.length === 0) return;
+    const nextIndex = (currentNodeIndex + 1) % connectedNodes.length;
+    const nextNode = connectedNodes[nextIndex];
+    handleNodeClick(nextNode);
+  }, [currentNodeIndex, connectedNodes]);
+
+  // 前のノードに移動
+  const handlePrev = useCallback(() => {
+    if (connectedNodes.length === 0) return;
+    const prevIndex = currentNodeIndex === 0 ? connectedNodes.length - 1 : currentNodeIndex - 1;
+    const prevNode = connectedNodes[prevIndex];
+    handleNodeClick(prevNode);
+  }, [currentNodeIndex, connectedNodes]);
 
   useEffect(() => {
     if (fgRef.current && isAutoRotate) {
@@ -221,12 +257,33 @@ export default function ForceGraphEditor({
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
             <div className="flex-1 bg-white relative">
-              <button
-                onClick={handleBack}
-                className="absolute top-4 left-4 px-3 py-1 text-sm bg-[#2C2C2C] text-[#BBBBBB] rounded-md hover:bg-[#3C3C3C] transition-colors z-10"
-              >
-                ← Back
-              </button>
+              <div className="absolute top-4 left-4 z-10">
+                <Button
+                  onClick={handleBack}
+                  variant="ghost"
+                  className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                >
+                  ← Back
+                </Button>
+              </div>
+              {selectedNode && connectedNodes.length > 0 && (
+                <div className="absolute top-4 right-4 flex gap-2 z-10">
+                  <Button
+                    onClick={handlePrev}
+                    variant="ghost"
+                    className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    variant="ghost"
+                    className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
               <ForceGraph2D
                 ref={fgRef}
                 graphData={sampleData}
