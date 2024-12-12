@@ -286,15 +286,15 @@ export default function ForceGraphEditor({
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
             <div className="flex-1 bg-white relative">
-              {selectedNode && selectedRowData && (
-                <Tooltip
-                  id="node-tooltip"
-                  className="bg-[#2C2C2C] border border-[#47FFDE] text-[#BBBBBB] p-2 rounded"
-                  place="top"
-                  content={`ID: ${selectedRowData.id}`}
-                  isOpen={true}
-                />
-              )}
+              <Tooltip
+                id="node-tooltip"
+                className="bg-[#2C2C2C] border border-[#47FFDE] text-[#BBBBBB] p-2 rounded"
+                place="top"
+                variant="dark"
+                content={selectedRowData ? `ID: ${selectedRowData.id}` : ''}
+                isOpen={!!(selectedNode && selectedRowData)}
+                float={true}
+              />
               <div className="absolute top-4 left-4 z-10">
                 <Button
                   onClick={handleBack}
@@ -329,11 +329,65 @@ export default function ForceGraphEditor({
                 backgroundColor="#ffffff"
                 onNodeClick={(node: NodeObject) => {
                   handleNodeClick(node);
-                  // Set data-tooltip-id dynamically
-                  const nodeElement = document.querySelector(`[data-node-id="${node.id}"]`);
-                  if (nodeElement) {
-                    nodeElement.setAttribute('data-tooltip-id', 'node-tooltip');
+                }}
+                nodeCanvasObject={(node: NodeObject, ctx: CanvasRenderingContext2D) => {
+                  if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+                  
+                  // 選択されたノードがある場合、そのノード以外は描画しない
+                  if (selectedNode && node.id !== selectedNode.id) return;
+
+                  // Draw glow effect
+                  const gradient = ctx.createRadialGradient(
+                    node.x, node.y, nodeRadius * 0.5,
+                    node.x, node.y, nodeRadius * 2
+                  );
+                  gradient.addColorStop(0, 'rgba(3, 31, 104, 0.15)');
+                  gradient.addColorStop(1, 'rgba(3, 31, 104, 0)');
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, nodeRadius * 2, 0, 2 * Math.PI);
+                  ctx.fillStyle = gradient;
+                  ctx.fill();
+
+                  // Draw circle with gradient
+                  const circleGradient = ctx.createRadialGradient(
+                    node.x - nodeRadius * 0.3, node.y - nodeRadius * 0.3, nodeRadius * 0.1,
+                    node.x, node.y, nodeRadius * 1.2
+                  );
+                  circleGradient.addColorStop(0, '#ffffff');
+                  circleGradient.addColorStop(1, '#f8fafc');
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                  ctx.fillStyle = circleGradient;
+                  ctx.fill();
+                  ctx.strokeStyle = "#64748b";
+                  ctx.lineWidth = 0.75;
+                  ctx.stroke();
+
+                  // Set data-tooltip-id
+                  const element = document.elementFromPoint(node.x, node.y);
+                  if (element) {
+                    element.setAttribute('data-tooltip-id', 'node-tooltip');
                   }
+
+                  // Draw database icon and label
+                  const iconSize = nodeRadius * 1.4;
+                  const icon = new Image();
+                  icon.src = `data:image/svg+xml,${encodeURIComponent(
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#031F68" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3" fill="#e2e8f0"></ellipse><path d="M3 5V19C3 20.7 7 22 12 22S21 20.7 21 19V5" fill="#e2e8f0"></path><path d="M3 12C3 13.7 7 15 12 15S21 13.7 21 12"></path></svg>'
+                  )}`;
+                  ctx.drawImage(
+                    icon,
+                    node.x - iconSize / 2,
+                    node.y - iconSize / 2,
+                    iconSize,
+                    iconSize
+                  );
+
+                  // Draw table name
+                  ctx.font = '10px Arial';
+                  ctx.fillStyle = "#031F68";
+                  ctx.textAlign = 'center';
+                  ctx.fillText(node.table || '', node.x, node.y + nodeRadius * 3);
                 }}
                 width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
                 height={(window.innerHeight - 64) * 0.7}
