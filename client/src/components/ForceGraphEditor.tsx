@@ -8,7 +8,7 @@ import TableSchema from "@/components/TableSchema";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataPreview from "@/components/DataPreview";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+
 
 interface ForceGraphProps {
   charge?: number;
@@ -351,6 +351,46 @@ export default function ForceGraphEditor({
                   </Button>
                 </div>
               )}
+              <ForceGraph2D
+                ref={fgRef}
+                graphData={graphData}
+                nodeLabel="id"
+                backgroundColor="#ffffff"
+                onNodeClick={(node: NodeObject) => {
+                  handleNodeClick(node);
+                }}
+                onBackgroundClick={() => {
+                  setSelectedRowData(null);
+                }}
+                nodeCanvasObject={paintNode}
+                nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
+                  if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                  ctx.fillStyle = color;
+                  ctx.fill();
+                }}
+                linkCanvasObject={paintLink}
+                linkColor={() => "transparent"}
+                linkDirectionalArrowLength={0}
+                width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
+                height={(window.innerHeight - 64) * 0.7}
+                d3Force={(engine: any) => {
+                  engine
+                    .force('charge', d3.forceManyBody().strength(charge))
+                    .force('collide', d3.forceCollide(nodeRadius * 1.5))
+                    .force('link', d3.forceLink().distance(linkDistance))
+                    .force('center', d3.forceCenter());
+                }}
+                d3VelocityDecay={0.3}
+                enableNodeDrag={true}
+                enableZoomPanInteraction={true}
+                onNodeDragEnd={(node: NodeObject) => {
+                  node.fx = node.x;
+                  node.fy = node.y;
+                }}
+                autoPauseRedraw={false}
+              />
               
             </div>
             <div 
@@ -361,69 +401,22 @@ export default function ForceGraphEditor({
               <TableSchema node={selectedNode} selectedRowData={selectedRowData} />
             </div>
           </div>
-          {selectedNode && (
-            <PanelGroup direction="vertical">
-              <Panel defaultSize={70} minSize={30}>
-                <div className="h-full relative">
-                  <ForceGraph2D
-                    ref={fgRef}
-                    graphData={graphData}
-                    nodeLabel="id"
-                    backgroundColor="#ffffff"
-                    onNodeClick={(node: NodeObject) => {
-                      handleNodeClick(node);
-                    }}
-                    onBackgroundClick={() => {
-                      setSelectedRowData(null);
-                    }}
-                    nodeCanvasObject={paintNode}
-                    nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
-                      if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
-                      ctx.beginPath();
-                      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-                      ctx.fillStyle = color;
-                      ctx.fill();
-                    }}
-                    linkCanvasObject={paintLink}
-                    linkColor={() => "transparent"}
-                    linkDirectionalArrowLength={0}
-                    width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
-                    height="100%"
-                    d3Force={(engine: any) => {
-                      engine
-                        .force('charge', d3.forceManyBody().strength(charge))
-                        .force('collide', d3.forceCollide(nodeRadius * 1.5))
-                        .force('link', d3.forceLink().distance(linkDistance))
-                        .force('center', d3.forceCenter());
-                    }}
-                    d3VelocityDecay={0.3}
-                    enableNodeDrag={true}
-                    enableZoomPanInteraction={true}
-                    onNodeDragEnd={(node: NodeObject) => {
-                      node.fx = node.x;
-                      node.fy = node.y;
-                    }}
-                    autoPauseRedraw={false}
-                  />
-                </div>
-              </Panel>
-              <PanelResizeHandle className="h-2 bg-[#2C2C2C] hover:bg-[#3C3C3C] flex items-center justify-center cursor-row-resize border-y border-[#47FFDE]">
-                <div className="w-8 h-1 bg-[#47FFDE] rounded-full opacity-50" />
-              </PanelResizeHandle>
-              <Panel defaultSize={30} minSize={20}>
-                <div className="h-full bg-[#2C2C2C] p-4">
-                  <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
-                    データプレビュー: {selectedNode?.table}
-                  </h3>
-                  <DataPreview 
-                    tableName={selectedNode?.table} 
-                    onRowSelect={setSelectedRowData}
-                    selectedRowData={selectedRowData}
-                  />
-                </div>
-              </Panel>
-            </PanelGroup>
-          )}
+          <div 
+            className={`transition-all duration-300 ease-in-out ${
+              selectedNode ? 'h-[30vh]' : 'h-0'
+            } border-t border-[#47FFDE] bg-[#2C2C2C] overflow-hidden`}
+          >
+            <div className="p-4">
+              <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
+                データプレビュー: {selectedNode?.table}
+              </h3>
+              <DataPreview 
+                tableName={selectedNode?.table} 
+                onRowSelect={setSelectedRowData}
+                selectedRowData={selectedRowData}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
