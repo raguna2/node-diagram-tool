@@ -17,40 +17,40 @@ interface ForceGraphProps {
   isAutoRotate?: boolean;
 }
 
-import { GraphData } from 'react-force-graph-2d';
+import { GraphData, NodeObject as BaseNodeObject } from 'react-force-graph-2d';
 
-interface NodeObject {
-  x?: number;
-  y?: number;
-  fx?: number;
-  fy?: number;
+interface CustomNodeObject extends BaseNodeObject {
   id: string;
   group: number;
   table: string;
-  vx?: number;
-  vy?: number;
 }
 
-interface LinkObject {
-  source: NodeObject;
-  target: NodeObject;
+interface CustomLinkObject {
+  source: string | CustomNodeObject;
+  target: string | CustomNodeObject;
   relationship: string;
   value: number;
 }
 
-type ForceGraphData = GraphData<NodeObject, LinkObject>;
+type ForceGraphData = {
+  nodes: CustomNodeObject[];
+  links: CustomLinkObject[];
+};
 
-type D3Node = NodeObject & {
+type D3Node = CustomNodeObject & {
   x: number;
   y: number;
   vx: number;
   vy: number;
 };
 
-type D3Link = LinkObject & {
+type D3Link = CustomLinkObject & {
   source: D3Node;
   target: D3Node;
 };
+
+type NodeCanvasObject = (node: D3Node, ctx: CanvasRenderingContext2D, globalScale?: number) => void;
+type LinkCanvasObject = (link: D3Link, ctx: CanvasRenderingContext2D, globalScale?: number) => void;
 
 export default function ForceGraphEditor({
   charge = -100,
