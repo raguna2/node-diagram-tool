@@ -6,6 +6,7 @@ import Header from "@/components/Header";
 import TableSchema from "@/components/TableSchema";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import DataPreview from "@/components/DataPreview";
 
 interface ForceGraphProps {
   charge?: number;
@@ -360,10 +361,7 @@ export default function ForceGraphEditor({
               <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
                 データプレビュー: {selectedNode?.table}
               </h3>
-              <div className="overflow-auto">
-                {/* データテーブルの実装はここに追加予定 */}
-                <p className="text-[#BBBBBB]">データベースからのデータをここに表示します</p>
-              </div>
+              <DataPreview tableName={selectedNode?.table} />
             </div>
           </div>
         </div>
