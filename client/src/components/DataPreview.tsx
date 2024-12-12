@@ -7,31 +7,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { sampleTableData } from "@/lib/sampleTableData";
-import { findRelatedTable } from "@/lib/tableRelations";
 
 interface DataPreviewProps {
   tableName: string | undefined;
   onRowSelect?: (data: Record<string, any>, tableName: string) => void;
   selectedRowData?: Record<string, any> | null;
-  selectedNodeTable?: string | null;
 }
 
-export default function DataPreview({ tableName, onRowSelect, selectedRowData, selectedNodeTable }: DataPreviewProps) {
+export default function DataPreview({ tableName, onRowSelect, selectedRowData }: DataPreviewProps) {
   if (!tableName || !sampleTableData[tableName]) return null;
 
-  // リレーションに基づいてデータを絞り込む
-  let data = sampleTableData[tableName];
-  if (selectedRowData && selectedNodeTable === tableName) {
-    const relation = findRelatedTable(tableName);
-    if (relation) {
-      // ズームイン時のみ関連テーブルのデータを絞り込む
-      if (relation.sourceTable === tableName) {
-        data = data.filter(row => row[relation.sourceKey] === selectedRowData.id);
-      } else if (relation.targetTable === tableName) {
-        data = data.filter(row => row[relation.targetKey] === selectedRowData.id);
-      }
-    }
-  }
+  const data = sampleTableData[tableName];
   const columns = Object.keys(data[0]);
 
   return (

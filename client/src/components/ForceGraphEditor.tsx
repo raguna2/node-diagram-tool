@@ -143,27 +143,6 @@ export default function ForceGraphEditor({
 
   const handleBack = useCallback(() => {
     setSelectedNode(null);
-    // selectedRowDataを保持したまま、ノード選択状態のみクリア
-    
-    // リレーションのあるノードを探して強調表示
-    if (selectedRowData) {
-      const currentTable = selectedNode?.table;
-      const relation = findRelatedTable(currentTable || '');
-      if (relation) {
-        const relatedNode = graphData.nodes.find(n => 
-          (relation.sourceTable === currentTable && n.table === relation.targetTable) ||
-          (relation.targetTable === currentTable && n.table === relation.sourceTable)
-        );
-        if (relatedNode) {
-          // リレーションノードの状態を更新
-          setSelectedRowData(prevData => ({
-            ...prevData,
-            relatedNodeId: relatedNode.id
-          }));
-        }
-      }
-    }
-    
     if (fgRef.current) {
       const fg = fgRef.current;
       // 即座にズームアウトを開始
@@ -205,21 +184,8 @@ export default function ForceGraphEditor({
   const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
-    // リレーションを考慮したノードの描画判定
-    const relation = findRelatedTable(node.table);
-    const isRelatedNode = selectedRowData && relation && (
-      (relation.sourceTable === node.table && selectedRowData[relation.sourceKey]) ||
-      (relation.targetTable === node.table && selectedRowData[relation.targetKey])
-    );
-
-    // 選択されたノード、または選択データに関連するノードのみ描画
-    if (!selectedNode && !isRelatedNode) {
-      // ノード未選択時は全ノードを表示
-      ctx.globalAlpha = 0.3;
-    } else if (selectedNode && node.id !== selectedNode.id && !isRelatedNode) {
-      // 選択ノードまたは関連ノード以外は非表示
-      return;
-    }
+    // 選択されたノードがある場合、そのノード以外は描画しない
+    if (selectedNode && node.id !== selectedNode.id) return;
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
@@ -481,7 +447,6 @@ export default function ForceGraphEditor({
                 tableName={selectedNode?.table} 
                 onRowSelect={handleRowSelect}
                 selectedRowData={selectedRowData}
-                selectedNodeTable={selectedNode?.table}
               />
             </div>
           </div>
