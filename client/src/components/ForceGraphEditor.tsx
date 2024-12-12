@@ -5,6 +5,7 @@ import * as d3 from "d3-force";
 import { Tooltip } from 'react-tooltip';
 import Header from "@/components/Header";
 import TableSchema from "@/components/TableSchema";
+import TableListSidebar from "@/components/TableListSidebar";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataPreview from "@/components/DataPreview";
@@ -320,6 +321,13 @@ export default function ForceGraphEditor({
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-1">
+        <TableListSidebar
+          onTableSelect={(tableId) => {
+            const node = graphData.nodes.find(n => n.id === tableId);
+            if (node) handleNodeClick(node);
+          }}
+          selectedNode={selectedNode?.id}
+        />
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
             <div className="flex-1 bg-white relative">
