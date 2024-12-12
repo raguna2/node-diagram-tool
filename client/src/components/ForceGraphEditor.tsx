@@ -41,7 +41,7 @@ export default function ForceGraphEditor({
   const nodeRadius = 12;
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
-  const [selectedRowData, setSelectedRowData] = useState<Record<string, any> | null>(null);
+  const [selectedRowDataMap, setSelectedRowDataMap] = useState<Map<string, Record<string, any>>>(new Map());
   const [graphData, setGraphData] = useState(sampleData);
 
   const zoomToNode = useCallback((node: NodeObject) => {
@@ -72,7 +72,7 @@ export default function ForceGraphEditor({
     });
     
     setSelectedNode(node);
-    setSelectedRowData(null); // ノードを切り替えた時は選択をリセット
+    // selectedRowDataMapは維持されます（リセットしない）
     
     // ズームトゥアニメーション
     zoomToNode(node);
@@ -207,7 +207,8 @@ export default function ForceGraphEditor({
       ctx.fill();
 
       // Draw data indicator if row is selected
-      if (selectedRowData) {
+      const nodeData = selectedRowDataMap.get(node.id);
+      if (nodeData) {
         // Animated ring
         const ringSize = 1 + Math.sin(time * 3) * 0.05;
         ctx.beginPath();
@@ -220,7 +221,7 @@ export default function ForceGraphEditor({
         ctx.font = 'bold 12px Arial';
         ctx.fillStyle = '#2C2C2C';
         ctx.textAlign = 'center';
-        ctx.fillText(`ID: ${selectedRowData.id}`, node.x, node.y - nodeRadius * 2.5);
+        ctx.fillText(`ID: ${nodeData.id}`, node.x, node.y - nodeRadius * 2.5);
       }
     }
 
@@ -449,8 +450,16 @@ export default function ForceGraphEditor({
               </h3>
               <DataPreview 
                 tableName={selectedNode?.table} 
-                onRowSelect={setSelectedRowData}
-                selectedRowData={selectedRowData}
+                onRowSelect={(data) => {
+                  if (selectedNode) {
+                    setSelectedRowDataMap(prev => {
+                      const newMap = new Map(prev);
+                      newMap.set(selectedNode.id, data);
+                      return newMap;
+                    });
+                  }
+                }}
+                selectedRowData={selectedNode ? selectedRowDataMap.get(selectedNode.id) : null}
               />
             </div>
           </div>
