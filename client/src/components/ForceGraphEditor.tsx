@@ -59,6 +59,7 @@ export default function ForceGraphEditor({
 
   const handleNodeClick = useCallback((node: NodeObject) => {
     setSelectedNode(node);
+    setSelectedRowData(null); // ノードを切り替えた時は選択をリセット
     zoomToNode(node);
   }, [zoomToNode]);
 
@@ -291,8 +292,14 @@ export default function ForceGraphEditor({
                 className="bg-[#2C2C2C] border border-[#47FFDE] text-[#BBBBBB] p-2 rounded"
                 place="top"
                 variant="dark"
-                content={selectedRowData ? `ID: ${selectedRowData.id}` : ''}
-                isOpen={!!(selectedNode && selectedRowData)}
+                content={
+                  selectedRowData 
+                    ? `ID: ${selectedRowData.id}`
+                    : selectedNode 
+                      ? 'データを選択してください'
+                      : ''
+                }
+                isOpen={!!selectedNode}
                 float={true}
               />
               <div className="absolute top-4 left-4 z-10">
