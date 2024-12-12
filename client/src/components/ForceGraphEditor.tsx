@@ -4,7 +4,7 @@ import { sampleData } from "@/lib/sampleData";
 import * as d3 from "d3-force";
 import { Tooltip } from 'react-tooltip';
 import Header from "@/components/Header";
-import TableSchema from "@/components/TableSchema";
+import { getSchemaContent } from "@/components/TableSchema";
 import TableListSidebar from "@/components/TableListSidebar";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ interface CustomNodeObject extends BaseNodeObject {
   id: string;
   group: number;
   table: string;
+  tooltip?: string; // Added tooltip property
 }
 
 interface CustomLinkObject {
@@ -198,7 +199,7 @@ export default function ForceGraphEditor({
     }
   }, [isAutoRotate]);
   
-  const paintNode = (node: D3Node, ctx: CanvasRenderingContext2D) => {
+  const paintNode = (node: D3Node, ctx: CanvasRenderingContext2D, globalScale: number) => {
     if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
     const isCurrentSelected = selectedNode && node.id === selectedNode.id;
@@ -293,11 +294,14 @@ export default function ForceGraphEditor({
     ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
     ctx.shadowBlur = 2;
     ctx.fillText(node.table || '', node.x, node.y + nodeRadius * 3);
-    
-    // We don't need to draw tooltip here as we'll use react-tooltip
-    
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
+
+    // Add hover area for tooltip
+    const tooltipContent = getSchemaContent(node.table);
+    if (tooltipContent) {
+      node.tooltip = tooltipContent;
+    }
   };
 
   const paintLink = (link: D3Link, ctx: CanvasRenderingContext2D) => {
@@ -525,16 +529,7 @@ export default function ForceGraphEditor({
               />
               
             </div>
-            <div 
-              className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                selectedNode ? 'w-1/3 border-l border-[#47FFDE]' : 'w-0'
-              }`}
-            >
-              <TableSchema 
-                node={selectedNode} 
-                selectedRowData={selectedNode ? selectedRowDataMap.get(selectedNode.id) : null} 
-              />
-            </div>
+            {/* スキーマ情報は削除し、ホバーで表示するように変更 */}
           </div>
           <div 
             className={`transition-all duration-300 ease-in-out ${

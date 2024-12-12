@@ -10,9 +10,7 @@ interface TableSchemaProps {
   selectedRowData?: Record<string, any> | null;
 }
 
-export default function TableSchema({ node, selectedRowData = null }: TableSchemaProps) {
-  if (!node) return null;
-
+export function getSchemaContent(tableName: string) {
   // テーブルごとのスキーマ定義
   const schemas: { [key: string]: Array<{ name: string; type: string; isPrimary?: boolean; isNullable?: boolean; isUnique?: boolean; defaultValue?: string }> } = {
     users: [
@@ -62,40 +60,24 @@ export default function TableSchema({ node, selectedRowData = null }: TableSchem
     ]
   };
 
+  const schema = schemas[tableName];
+  if (!schema) return null;
+
   return (
-    <Card className="p-6 bg-[#2C2C2C] text-[#BBBBBB] h-full overflow-auto transition-opacity duration-300 ease-in-out">
-      <h2 className="text-xl font-semibold mb-4 transition-transform duration-300 ease-in-out">
-        テーブル: {node.table}
-      </h2>
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-medium mb-2">スキーマ情報</h3>
-          <table className="w-full">
-            <thead>
-              <tr className="text-left border-b border-[#47FFDE]">
-                <th className="pb-2">カラム名</th>
-                <th className="pb-2">データ型</th>
-                <th className="pb-2">選択中の値</th>
-              </tr>
-            </thead>
-            <tbody>
-              {schemas[node.table]?.map((column) => (
-                <tr key={column.name} className="border-b border-[#47FFDE]/20">
-                  <td className="py-2">{column.name}</td>
-                  <td className="py-2">{column.type}</td>
-                  <td className="py-2">
-                    {selectedRowData && (
-                      typeof selectedRowData[column.name] === 'number'
-                        ? selectedRowData[column.name].toLocaleString()
-                        : String(selectedRowData[column.name] || '')
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+    <div className="p-2 max-w-sm bg-[#2C2C2C] rounded-md shadow-lg">
+      <h3 className="text-sm font-medium text-[#BBBBBB] mb-2">スキーマ情報</h3>
+      <div className="space-y-1">
+        {schema.map((column) => (
+          <div key={column.name} className="text-xs text-[#BBBBBB] flex justify-between">
+            <span className="font-medium">{column.name}</span>
+            <span className="text-[#47FFDE]">{column.type}</span>
+          </div>
+        ))}
       </div>
-    </Card>
+    </div>
   );
+}
+
+export default function TableSchema({ node }: { node: { table: string } }) {
+  return getSchemaContent(node.table);
 }
