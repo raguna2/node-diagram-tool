@@ -264,8 +264,8 @@ export default function ForceGraphEditor({
               />
             </div>
             <div 
-              className={`w-1/3 border-l border-[#47FFDE] transition-all duration-300 ease-in-out ${
-                selectedNode ? 'translate-x-0' : 'translate-x-full'
+              className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                selectedNode ? 'w-1/3 border-l border-[#47FFDE]' : 'w-0'
               }`}
             >
               <TableSchema node={selectedNode} />
