@@ -13,6 +13,21 @@ interface ForceGraphProps {
   isAutoRotate?: boolean;
 }
 
+interface NodeObject {
+  x?: number;
+  y?: number;
+  id: string;
+  group: number;
+  table: string;
+}
+
+interface LinkObject {
+  source: NodeObject | string;
+  target: NodeObject | string;
+  relationship: string;
+  value: number;
+}
+
 export default function ForceGraphEditor({
   charge = -100,
   linkDistance = 100,
@@ -23,16 +38,35 @@ export default function ForceGraphEditor({
   const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
   const [graphData, setGraphData] = useState(sampleData);
 
+  const zoomToNode = useCallback((node: NodeObject) => {
+    if (!fgRef.current) return;
+    const fg = fgRef.current;
+    const nodeX = node.x || 0;
+    const nodeY = node.y || 0;
+    
+    // 即座に大きくズームアウトして、ダイナミックなズームイン効果を作成
+    fg.zoom(0.3, 0);
+    
+    // 少し遅れて中央に移動しながらズームイン
+    setTimeout(() => {
+      fg.centerAt(nodeX, nodeY, 400);
+      fg.zoom(8, 400);
+    }, 50);
+  }, []);
+
+  const handleNodeClick = useCallback((node: NodeObject) => {
+    setSelectedNode(node);
+    zoomToNode(node);
+  }, [zoomToNode]);
+
   // 選択されたノードの接続先ノードを取得
   const connectedNodes = useMemo(() => {
     if (!selectedNode) return [];
-    const connections = graphData.links.filter(
-      link => {
-        const source = typeof link.source === 'string' ? link.source : link.source.id;
-        const target = typeof link.target === 'string' ? link.target : link.target.id;
-        return source === selectedNode.id || target === selectedNode.id;
-      }
-    );
+    const connections = graphData.links.filter(link => {
+      const source = typeof link.source === 'string' ? link.source : link.source.id;
+      const target = typeof link.target === 'string' ? link.target : link.target.id;
+      return source === selectedNode.id || target === selectedNode.id;
+    });
     return connections.map(link => {
       const connectedId = (typeof link.source === 'string' ? link.source : link.source.id) === selectedNode.id 
         ? (typeof link.target === 'string' ? link.target : link.target.id) 
@@ -47,18 +81,22 @@ export default function ForceGraphEditor({
     return connectedNodes.findIndex(node => node.id === selectedNode.id);
   }, [selectedNode, connectedNodes]);
 
-  // 次のノードに移動
-  const handleNext = useCallback(() => {
-    if (connectedNodes.length === 0) return;
-    const nextIndex = (currentNodeIndex + 1) % connectedNodes.length;
-    const nextNode = connectedNodes[nextIndex];
-    const graphNode = graphData.nodes.find(n => n.id === nextNode.id);
+  const navigateToNode = useCallback((targetNode: NodeObject) => {
+    const graphNode = graphData.nodes.find(n => n.id === targetNode.id);
     if (graphNode) {
       handleNodeClick(graphNode);
     }
-  }, [currentNodeIndex, connectedNodes, graphData.nodes]);
+  }, [graphData.nodes, handleNodeClick]);
 
-  // 前のノードに移動
+  const handleNext = useCallback(() => {
+    if (!connectedNodes || connectedNodes.length === 0) return;
+    const nextIndex = (currentNodeIndex + 1) % connectedNodes.length;
+    const nextNode = connectedNodes[nextIndex];
+    if (nextNode) {
+      navigateToNode(nextNode);
+    }
+  }, [currentNodeIndex, connectedNodes, navigateToNode]);
+
   const handlePrev = useCallback(() => {
     if (!connectedNodes || connectedNodes.length === 0) return;
     
@@ -70,51 +108,10 @@ export default function ForceGraphEditor({
     }
     
     const prevNode = connectedNodes[prevIndex];
-    if (!prevNode) return;
-    
-    const graphNode = graphData.nodes.find(n => n.id === prevNode.id);
-    if (graphNode) {
-      handleNodeClick(graphNode);
+    if (prevNode) {
+      navigateToNode(prevNode);
     }
-  }, [currentNodeIndex, connectedNodes, graphData.nodes, handleNodeClick]);
-
-  useEffect(() => {
-    if (fgRef.current && isAutoRotate) {
-      const distance = 400;
-      let angle = 0;
-
-      const interval = setInterval(() => {
-        const fg = fgRef.current;
-        if (fg) {
-          fg.centerAt(
-            distance * Math.sin(angle),
-            distance * Math.cos(angle)
-          );
-        }
-        angle += Math.PI / 300;
-      }, 30);
-
-      return () => clearInterval(interval);
-    }
-  }, [isAutoRotate]);
-
-  const handleNodeClick = useCallback((node: NodeObject) => {
-    setSelectedNode(node);
-    if (fgRef.current) {
-      const fg = fgRef.current;
-      const nodeX = node.x || 0;
-      const nodeY = node.y || 0;
-      
-      // 即座に大きくズームアウトして、ダイナミックなズームイン効果を作成
-      fg.zoom(0.3, 0);
-      
-      // 少し遅れて中央に移動しながらズームイン
-      setTimeout(() => {
-        fg.centerAt(nodeX, nodeY, 400);
-        fg.zoom(8, 400);
-      }, 50);
-    }
-  }, []);
+  }, [currentNodeIndex, connectedNodes, navigateToNode]);
 
   const handleBack = useCallback(() => {
     setSelectedNode(null);
@@ -136,20 +133,25 @@ export default function ForceGraphEditor({
     }
   }, []);
 
-  interface NodeObject {
-    x?: number;
-    y?: number;
-    id: string;
-    group: number;
-    table: string;
-  }
+  useEffect(() => {
+    if (fgRef.current && isAutoRotate) {
+      const distance = 400;
+      let angle = 0;
 
-  interface LinkObject {
-    source: NodeObject;
-    target: NodeObject;
-    relationship: string;
-    value: number;
-  }
+      const interval = setInterval(() => {
+        const fg = fgRef.current;
+        if (fg) {
+          fg.centerAt(
+            distance * Math.sin(angle),
+            distance * Math.cos(angle)
+          );
+        }
+        angle += Math.PI / 300;
+      }, 30);
+
+      return () => clearInterval(interval);
+    }
+  }, [isAutoRotate]);
   
   const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
@@ -210,10 +212,10 @@ export default function ForceGraphEditor({
   };
 
   const paintLink = (link: LinkObject, ctx: CanvasRenderingContext2D) => {
-    const start = link.source;
-    const end = link.target;
+    const start = typeof link.source === 'string' ? graphData.nodes.find(n => n.id === link.source) : link.source;
+    const end = typeof link.target === 'string' ? graphData.nodes.find(n => n.id === link.target) : link.target;
     
-    if (typeof start.x === 'undefined' || typeof start.y === 'undefined' ||
+    if (!start || !end || typeof start.x === 'undefined' || typeof start.y === 'undefined' ||
         typeof end.x === 'undefined' || typeof end.y === 'undefined') {
       return;
     }
@@ -307,12 +309,12 @@ export default function ForceGraphEditor({
               )}
               <ForceGraph2D
                 ref={fgRef}
-                graphData={graphData as any}
+                graphData={graphData}
                 nodeLabel="id"
                 backgroundColor="#ffffff"
                 width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
                 height={(window.innerHeight - 64) * 0.7}
-                d3Force={(engine) => {
+                d3Force={(engine: any) => {
                   engine
                     .force('charge', d3.forceManyBody().strength(charge))
                     .force('collide', d3.forceCollide(nodeRadius * 1.5))
@@ -323,7 +325,7 @@ export default function ForceGraphEditor({
                 enableNodeDrag={true}
                 enableZoomPanInteraction={true}
                 onNodeClick={handleNodeClick}
-                onNodeDragEnd={(node) => {
+                onNodeDragEnd={(node: NodeObject) => {
                   node.fx = node.x;
                   node.fy = node.y;
                 }}
