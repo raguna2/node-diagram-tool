@@ -296,8 +296,8 @@ export default function ForceGraphEditor({
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
 
-    // Create a div for schema info
-    if (globalScale >= 1 && node.table) {
+    // Create a div for schema info only when zoomed in enough
+    if (globalScale >= 2.5 && node.table) {
       // Get selected row data for this node
       const rowData = selectedRowDataMap.get(node.id);
       const schemaContent = getSchemaContent(node.table, rowData);
@@ -307,6 +307,9 @@ export default function ForceGraphEditor({
           content: schemaContent
         };
       }
+    } else {
+      // Clear tooltip when zoomed out
+      node.tooltip = undefined;
     }
   };
 
