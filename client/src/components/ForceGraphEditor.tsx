@@ -302,14 +302,8 @@ export default function ForceGraphEditor({
       const rowData = selectedRowDataMap.get(node.id);
       const schemaContent = getSchemaContent(node.table, rowData);
       if (schemaContent) {
-        // Calculate position for the modal to be centered on the node
-        const modalX = node.x;
-        const modalY = node.y;
-        
-        // Save the position and content for the modal
+        // Save the schema content for the modal
         node.tooltip = {
-          x: modalX,
-          y: modalY,
           content: schemaContent
         };
       }
