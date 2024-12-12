@@ -120,7 +120,6 @@ export default function ForceGraphEditor({
   }, [currentNodeIndex, connectedNodes, navigateToNode]);
 
   const handleBack = useCallback(() => {
-    setSelectedNode(null);
     if (fgRef.current) {
       const fg = fgRef.current;
       // 即座にズームアウトを開始
@@ -162,15 +161,15 @@ export default function ForceGraphEditor({
   const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
-    // 選択されたノードがある場合、そのノード以外は描画しない
-    if (selectedNode && node.id !== selectedNode.id) return;
+    // すべてのノードを描画するが、選択されたノードには特別な効果を付ける
+    const isSelected = selectedNode && node.id === selectedNode.id;
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
     const pulseSize = 1 + Math.sin(time * 2) * 0.1; // Pulsating effect
     
     // Outer glow for selected state
-    if (selectedNode && node.id === selectedNode.id) {
+    if (isSelected) {
       const outerGlow = ctx.createRadialGradient(
         node.x, node.y, nodeRadius * 1.5,
         node.x, node.y, nodeRadius * 3 * pulseSize
