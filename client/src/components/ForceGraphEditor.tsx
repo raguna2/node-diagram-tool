@@ -189,15 +189,12 @@ export default function ForceGraphEditor({
       return () => clearInterval(interval);
     }
   }, [isAutoRotate]);
-  // ズームレベルの変更を監視
-  useEffect(() => {
-    if (fgRef.current) {
-      const fg = fgRef.current;
-      fg.onZoom(() => {
-        // コンポーネントの再レンダリングを強制
-        setGraphData(prevData => ({ ...prevData }));
-      });
-    }
+  // ズームレベルの変更を監視するためのstate
+  const [currentZoom, setCurrentZoom] = useState(1);
+
+  // ズーム終了時にstateを更新
+  const handleZoomEnd = useCallback((zoom: number) => {
+    setCurrentZoom(zoom);
   }, []);
 
   
@@ -592,13 +589,14 @@ export default function ForceGraphEditor({
               }
             }}
             autoPauseRedraw={false}
+            onZoomEnd={handleZoomEnd}
           />
         </div>
 
         {/* Data preview sidebar */}
         <div 
           className={`transition-all duration-300 border-l border-[#47FFDE] bg-[#2C2C2C] ${
-            (fgRef.current?.zoom() || 1) < 2 ? 'w-0 opacity-0' : 'flex-1 opacity-100'
+            currentZoom < 2 ? 'w-0 opacity-0' : 'flex-1 opacity-100'
           }`}
         >
           <div className="p-4 overflow-x-auto">
