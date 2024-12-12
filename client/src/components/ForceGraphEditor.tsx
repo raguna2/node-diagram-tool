@@ -309,7 +309,7 @@ export default function ForceGraphEditor({
     const isZoomedIn = currentZoom > 2;
 
     // ズームイン時は選択されたノードに関連するエッジのみ表示
-    if (isZoomedIn && selectedNode && start.id !== selectedNode.id && end.id !== selectedNode.id) {
+    if (isZoomedIn && selectedNode && source.id !== selectedNode.id && target.id !== selectedNode.id) {
       return;
     }
     
@@ -318,12 +318,12 @@ export default function ForceGraphEditor({
     const dashOffset = time * 15; // Speed of animation
     
     // Calculate angle for gradient
-    const dx = end.x - start.x;
-    const dy = end.y - start.y;
+    const dx = target.x - source.x;
+    const dy = target.y - source.y;
     const angle = Math.atan2(dy, dx);
     
     // Create gradient
-    const gradient = ctx.createLinearGradient(start.x, start.y, end.x, end.y);
+    const gradient = ctx.createLinearGradient(source.x, source.y, target.x, target.y);
     gradient.addColorStop(0, 'rgba(100, 116, 139, 0.4)');
     gradient.addColorStop(1, 'rgba(100, 116, 139, 0.1)');
     
