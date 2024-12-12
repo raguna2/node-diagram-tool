@@ -298,7 +298,9 @@ export default function ForceGraphEditor({
 
     // Create a div for schema info
     if (globalScale >= 1 && node.table) {
-      const schemaContent = getSchemaContent(node.table);
+      // Get selected row data for this node
+      const rowData = selectedRowDataMap.get(node.id);
+      const schemaContent = getSchemaContent(node.table, rowData);
       if (schemaContent) {
         // Calculate position for the modal to be centered on the node
         const modalX = node.x;

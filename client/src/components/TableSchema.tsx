@@ -64,16 +64,31 @@ export function getSchemaContent(tableName: string) {
   if (!schema) return null;
 
   return (
-    <div className="p-2 max-w-sm rounded-md">
-      <h3 className="text-lg font-semibold text-[#47FFDE] mb-4">スキーマ情報</h3>
-      <div className="space-y-2">
-        {schema.map((column) => (
-          <div key={column.name} className="text-sm text-[#FFFFFF] flex justify-between items-center py-1 border-b border-[#47FFDE]/10">
-            <span className="font-medium">{column.name}</span>
-            <span className="text-[#47FFDE] opacity-80 font-mono text-xs bg-[#47FFDE]/10 px-2 py-0.5 rounded">{column.type}</span>
-          </div>
-        ))}
+    <div className="p-2 rounded-md">
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-[#47FFDE] mb-4">スキーマ情報</h3>
+        <div className="space-y-2">
+          {schema.map((column) => (
+            <div key={column.name} className="text-sm text-[#FFFFFF] flex justify-between items-center py-1 border-b border-[#47FFDE]/10">
+              <span className="font-medium">{column.name}</span>
+              <span className="text-[#47FFDE] opacity-80 font-mono text-xs bg-[#47FFDE]/10 px-2 py-0.5 rounded">{column.type}</span>
+            </div>
+          ))}
+        </div>
       </div>
+      {selectedRowData && (
+        <div>
+          <h3 className="text-lg font-semibold text-[#47FFDE] mb-4">選択された行データ</h3>
+          <div className="space-y-2">
+            {Object.entries(selectedRowData).map(([key, value]) => (
+              <div key={key} className="text-sm text-[#FFFFFF] flex justify-between items-center py-1 border-b border-[#47FFDE]/10">
+                <span className="font-medium">{key}</span>
+                <span className="text-[#BBBBBB] font-mono text-xs">{String(value)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
