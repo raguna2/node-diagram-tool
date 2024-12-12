@@ -43,18 +43,18 @@ export default function ForceGraphEditor({
   const handleNodeClick = useCallback((node: NodeObject) => {
     setSelectedNode(node);
     if (fgRef.current) {
-      const distance = 100;
-      const distRatio = 1 + distance/Math.hypot(node.x || 0, node.y || 0);
+      // 他のノードを非表示にし、選択したノードだけを表示
+      const filteredData = {
+        nodes: [node],
+        links: [] // 選択したノードに関連するエッジのみを表示する場合は、ここでフィルタリング
+      };
       
-      fgRef.current.zoomToFit(400);
+      fgRef.current.graphData(filteredData);
       
+      // ノードを中央に配置し、適切なズームレベルで表示
       setTimeout(() => {
-        fgRef.current.centerAt(
-          node.x,
-          node.y,
-          1000
-        );
-        fgRef.current.zoom(2.5, 1000);
+        fgRef.current.centerAt(0, 0, 1000);
+        fgRef.current.zoom(4, 1000);
       }, 400);
     }
   }, []);
@@ -192,7 +192,19 @@ export default function ForceGraphEditor({
       <div className="flex flex-1">
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
-            <div className="w-2/3 bg-white">
+            <div className="w-2/3 bg-white relative">
+              <button
+                onClick={() => {
+                  setSelectedNode(null);
+                  if (fgRef.current) {
+                    fgRef.current.graphData(sampleData);
+                    fgRef.current.zoomToFit(400);
+                  }
+                }}
+                className="absolute top-4 left-4 px-3 py-1 text-sm bg-[#2C2C2C] text-[#BBBBBB] rounded-md hover:bg-[#3C3C3C] transition-colors z-10"
+              >
+                ← Back
+              </button>
               <ForceGraph2D
                 ref={fgRef}
                 graphData={sampleData}
