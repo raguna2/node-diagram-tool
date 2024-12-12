@@ -436,7 +436,10 @@ export default function ForceGraphEditor({
                 selectedNode ? 'w-1/3 border-l border-[#47FFDE]' : 'w-0'
               }`}
             >
-              <TableSchema node={selectedNode} selectedRowData={selectedNode ? selectedRowDataMap.get(selectedNode.id) : null} />
+              <TableSchema 
+                node={selectedNode} 
+                selectedRowData={selectedNode ? selectedRowDataMap.get(selectedNode.id) : null} 
+              />
             </div>
           </div>
           <div 
