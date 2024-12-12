@@ -17,6 +17,7 @@ export default function ForceGraphEditor({
 }: ForceGraphProps) {
   const fgRef = useRef<any>();
   const nodeRadius = 12;
+  const [selectedNode, setSelectedNode] = useState<NodeObject | null>(null);
 
   useEffect(() => {
     if (fgRef.current && isAutoRotate) {
@@ -37,6 +38,25 @@ export default function ForceGraphEditor({
       return () => clearInterval(interval);
     }
   }, [isAutoRotate]);
+
+  const handleNodeClick = useCallback((node: NodeObject) => {
+    setSelectedNode(node);
+    if (fgRef.current) {
+      const distance = 100;
+      const distRatio = 1 + distance/Math.hypot(node.x || 0, node.y || 0);
+      
+      fgRef.current.zoomToFit(400);
+      
+      setTimeout(() => {
+        fgRef.current.centerAt(
+          node.x,
+          node.y,
+          1000
+        );
+        fgRef.current.zoom(2.5, 1000);
+      }, 400);
+    }
+  }, []);
 
   interface NodeObject {
     x?: number;
@@ -168,40 +188,62 @@ export default function ForceGraphEditor({
   return (
     <div className="flex flex-col h-screen">
       <Header />
-      <div className="flex flex-1 bg-white">
-        <ForceGraph2D
-          ref={fgRef}
-          graphData={sampleData}
-          nodeLabel="id"
-          backgroundColor="#ffffff"
-          width={window.innerWidth}
-          height={window.innerHeight - 64}
-          d3Force={(engine) => {
-            engine
-              .force('charge', d3.forceManyBody().strength(charge))
-              .force('collide', d3.forceCollide(nodeRadius * 1.5))
-              .force('link', d3.forceLink().distance(linkDistance))
-              .force('center', d3.forceCenter());
-          }}
-          d3VelocityDecay={0.3}
-          enableNodeDrag={true}
-          enableZoomPanInteraction={true}
-          onNodeDragEnd={(node) => {
-            node.fx = node.x;
-            node.fy = node.y;
-          }}
-          autoPauseRedraw={false}
-          nodeCanvasObject={paintNode}
-          nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
-            ctx.beginPath();
-            ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-            ctx.fillStyle = color;
-            ctx.fill();
-          }}
-          linkCanvasObject={paintLink}
-          linkColor={() => "transparent"}
-          linkDirectionalArrowLength={0}
-        />
+      <div className="flex flex-1">
+        <div className="flex flex-col flex-1">
+          <div className="flex flex-1">
+            <div className="w-2/3 bg-white">
+              <ForceGraph2D
+                ref={fgRef}
+                graphData={sampleData}
+                nodeLabel="id"
+                backgroundColor="#ffffff"
+                width={window.innerWidth * 0.66}
+                height={(window.innerHeight - 64) * 0.7}
+                d3Force={(engine) => {
+                  engine
+                    .force('charge', d3.forceManyBody().strength(charge))
+                    .force('collide', d3.forceCollide(nodeRadius * 1.5))
+                    .force('link', d3.forceLink().distance(linkDistance))
+                    .force('center', d3.forceCenter());
+                }}
+                d3VelocityDecay={0.3}
+                enableNodeDrag={true}
+                enableZoomPanInteraction={true}
+                onNodeClick={handleNodeClick}
+                onNodeDragEnd={(node) => {
+                  node.fx = node.x;
+                  node.fy = node.y;
+                }}
+                autoPauseRedraw={false}
+                nodeCanvasObject={paintNode}
+                nodePointerAreaPaint={(node: NodeObject, color: string, ctx: CanvasRenderingContext2D) => {
+                  if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+                  ctx.beginPath();
+                  ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                  ctx.fillStyle = color;
+                  ctx.fill();
+                }}
+                linkCanvasObject={paintLink}
+                linkColor={() => "transparent"}
+                linkDirectionalArrowLength={0}
+              />
+            </div>
+            <div className="w-1/3 border-l border-[#47FFDE]">
+              <TableSchema node={selectedNode} />
+            </div>
+          </div>
+          <div className="h-[30vh] border-t border-[#47FFDE] p-4 bg-[#2C2C2C]">
+            {selectedNode && (
+              <div>
+                <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">データプレビュー: {selectedNode.table}</h3>
+                <div className="overflow-auto">
+                  {/* データテーブルの実装はここに追加予定 */}
+                  <p className="text-[#BBBBBB]">データベースからのデータをここに表示します</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
