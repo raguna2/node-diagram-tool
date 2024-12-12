@@ -27,10 +27,16 @@ export default function ForceGraphEditor({
   const connectedNodes = useMemo(() => {
     if (!selectedNode) return [];
     const connections = graphData.links.filter(
-      link => link.source === selectedNode.id || link.target === selectedNode.id
+      link => {
+        const source = typeof link.source === 'string' ? link.source : link.source.id;
+        const target = typeof link.target === 'string' ? link.target : link.target.id;
+        return source === selectedNode.id || target === selectedNode.id;
+      }
     );
     return connections.map(link => {
-      const connectedId = link.source === selectedNode.id ? link.target : link.source;
+      const connectedId = (typeof link.source === 'string' ? link.source : link.source.id) === selectedNode.id 
+        ? (typeof link.target === 'string' ? link.target : link.target.id) 
+        : (typeof link.source === 'string' ? link.source : link.source.id);
       return graphData.nodes.find(node => node.id === connectedId);
     }).filter((node): node is NodeObject => node !== undefined);
   }, [selectedNode, graphData]);
@@ -46,16 +52,22 @@ export default function ForceGraphEditor({
     if (connectedNodes.length === 0) return;
     const nextIndex = (currentNodeIndex + 1) % connectedNodes.length;
     const nextNode = connectedNodes[nextIndex];
-    handleNodeClick(nextNode);
-  }, [currentNodeIndex, connectedNodes]);
+    const graphNode = graphData.nodes.find(n => n.id === nextNode.id);
+    if (graphNode) {
+      handleNodeClick(graphNode);
+    }
+  }, [currentNodeIndex, connectedNodes, graphData.nodes]);
 
   // 前のノードに移動
   const handlePrev = useCallback(() => {
     if (connectedNodes.length === 0) return;
     const prevIndex = currentNodeIndex === 0 ? connectedNodes.length - 1 : currentNodeIndex - 1;
     const prevNode = connectedNodes[prevIndex];
-    handleNodeClick(prevNode);
-  }, [currentNodeIndex, connectedNodes]);
+    const graphNode = graphData.nodes.find(n => n.id === prevNode.id);
+    if (graphNode) {
+      handleNodeClick(graphNode);
+    }
+  }, [currentNodeIndex, connectedNodes, graphData.nodes]);
 
   useEffect(() => {
     if (fgRef.current && isAutoRotate) {
@@ -286,7 +298,7 @@ export default function ForceGraphEditor({
               )}
               <ForceGraph2D
                 ref={fgRef}
-                graphData={sampleData}
+                graphData={graphData as any}
                 nodeLabel="id"
                 backgroundColor="#ffffff"
                 width={window.innerWidth - (selectedNode ? window.innerWidth / 3 : 0)}
