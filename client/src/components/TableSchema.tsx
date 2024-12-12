@@ -64,32 +64,23 @@ export function getSchemaContent(tableName: string, selectedRowData?: Record<str
   if (!schema) return null;
 
   return (
-    <div className="p-2 rounded-md">
-      <div className="grid grid-cols-2 gap-8">
-        <div>
-          <h3 className="text-lg font-semibold text-[#47FFDE] mb-4">スキーマ情報</h3>
-          <div className="space-y-2">
-            {schema.map((column) => (
-              <div key={column.name} className="text-sm text-[#FFFFFF] flex justify-between items-center py-1 border-b border-[#47FFDE]/10">
-                <span className="font-medium">{column.name}</span>
-                <span className="text-[#47FFDE] opacity-80 font-mono text-xs bg-[#47FFDE]/10 px-2 py-0.5 rounded">{column.type}</span>
-              </div>
-            ))}
-          </div>
+    <div className="p-4 rounded-md">
+      <h3 className="text-lg font-semibold text-[#47FFDE] mb-4">テーブル情報</h3>
+      <div className="space-y-2">
+        <div className="grid grid-cols-3 gap-4 text-sm text-[#BBBBBB] border-b border-[#47FFDE]/20 pb-2 mb-2">
+          <span className="font-medium">カラム名</span>
+          <span className="font-medium">データ型</span>
+          <span className="font-medium">選択された値</span>
         </div>
-        {selectedRowData && (
-          <div>
-            <h3 className="text-lg font-semibold text-[#47FFDE] mb-4">選択された行データ</h3>
-            <div className="space-y-2">
-              {Object.entries(selectedRowData).map(([key, value]) => (
-                <div key={key} className="text-sm text-[#FFFFFF] flex justify-between items-center py-1 border-b border-[#47FFDE]/10">
-                  <span className="font-medium">{key}</span>
-                  <span className="text-[#BBBBBB] font-mono text-xs">{String(value)}</span>
-                </div>
-              ))}
-            </div>
+        {schema.map((column) => (
+          <div key={column.name} className="grid grid-cols-3 gap-4 text-sm text-[#FFFFFF] items-center py-2 border-b border-[#47FFDE]/10">
+            <span className="font-medium">{column.name}</span>
+            <span className="text-[#47FFDE] opacity-80 font-mono text-xs bg-[#47FFDE]/10 px-2 py-0.5 rounded w-fit">{column.type}</span>
+            <span className="text-[#BBBBBB] font-mono text-xs">
+              {selectedRowData ? String(selectedRowData[column.name] || '-') : '-'}
+            </span>
           </div>
-        )}
+        ))}
       </div>
     </div>
   );
