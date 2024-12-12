@@ -1,0 +1,134 @@
+'use client'
+
+import { useState } from 'react'
+import { Input } from '@/components/ui/input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import ReactFlow, { Background, Controls, MiniMap } from 'reactflow'
+import 'reactflow/dist/style.css'
+
+const tables = ['ユーザー', '注文', '商品', '在庫', 'カテゴリー']
+
+const dummyData = [
+  { id: 1, name: '山田太郎', email: 'taro@example.com', age: 30, department: '営業部', position: 'マネージャー', hireDate: '2020-04-01', salary: 5000000, performance: 'A', projectCount: 5 },
+  { id: 2, name: '佐藤花子', email: 'hanako@example.com', age: 28, department: '人事部', position: 'スペシャリスト', hireDate: '2019-09-15', salary: 4500000, performance: 'B', projectCount: 3 },
+  { id: 3, name: '鈴木一郎', email: 'ichiro@example.com', age: 35, department: '技術部', position: 'シニアエンジニア', hireDate: '2018-06-30', salary: 6000000, performance: 'S', projectCount: 8 },
+  { id: 4, name: '田中美咲', email: 'misaki@example.com', age: 26, department: 'マーケティング部', position: 'アシスタント', hireDate: '2021-01-10', salary: 3500000, performance: 'B', projectCount: 2 },
+  { id: 5, name: '高橋健太', email: 'kenta@example.com', age: 32, department: '財務部', position: 'アナリスト', hireDate: '2017-11-22', salary: 5500000, performance: 'A', projectCount: 6 },
+]
+
+const initialNodes = [
+  { id: '1', position: { x: 0, y: 0 }, data: { label: 'ノード1' } },
+  { id: '2', position: { x: 0, y: 100 }, data: { label: 'ノード2' } },
+]
+
+const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }]
+
+export default function DatabaseViewer() {
+  const [selectedTable, setSelectedTable] = useState<string | null>(null)
+  const [tableFilter, setTableFilter] = useState('')
+  const [dataFilter, setDataFilter] = useState('')
+
+  const filteredTables = tables.filter(table =>
+    table.toLowerCase().includes(tableFilter.toLowerCase())
+  )
+
+  const filteredData = dummyData.filter(
+    item =>
+      item.name.toLowerCase().includes(dataFilter.toLowerCase()) ||
+      item.email.toLowerCase().includes(dataFilter.toLowerCase()) ||
+      item.department.toLowerCase().includes(dataFilter.toLowerCase())
+  )
+
+  return (
+    <div className="flex h-screen">
+      <div className="w-64 border-r p-4 overflow-auto">
+        <Input
+          type="text"
+          placeholder="テーブルを検索..."
+          value={tableFilter}
+          onChange={(e) => setTableFilter(e.target.value)}
+          className="mb-4"
+        />
+        <ul>
+          {filteredTables.map(table => (
+            <li
+              key={table}
+              className="cursor-pointer hover:bg-gray-100 p-2 rounded"
+              onClick={() => setSelectedTable(table)}
+            >
+              {table}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex-1 flex overflow-hidden">
+        <div className="w-1/3 overflow-hidden">
+          <ReactFlow
+            nodes={initialNodes}
+            edges={initialEdges}
+            fitView
+            className="w-full h-full"
+          >
+            <Background />
+            <Controls />
+            <MiniMap />
+          </ReactFlow>
+        </div>
+        <div className="flex-1 p-4 overflow-auto border-l">
+          <h2 className="text-xl font-bold mb-4">
+            データプレビュー
+          </h2>
+          <Input
+            type="text"
+            placeholder="フィルター..."
+            value={dataFilter}
+            onChange={(e) => setDataFilter(e.target.value)}
+            className="mb-4"
+          />
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="whitespace-nowrap">ID</TableHead>
+                  <TableHead className="whitespace-nowrap">名前</TableHead>
+                  <TableHead className="whitespace-nowrap">メールアドレス</TableHead>
+                  <TableHead className="whitespace-nowrap">年齢</TableHead>
+                  <TableHead className="whitespace-nowrap">部署</TableHead>
+                  <TableHead className="whitespace-nowrap">役職</TableHead>
+                  <TableHead className="whitespace-nowrap">入社日</TableHead>
+                  <TableHead className="whitespace-nowrap">給与</TableHead>
+                  <TableHead className="whitespace-nowrap">評価</TableHead>
+                  <TableHead className="whitespace-nowrap">プロジェクト数</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredData.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="whitespace-nowrap">{item.id}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.name}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.email}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.age}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.department}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.position}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.hireDate}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.salary.toLocaleString()}円</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.performance}</TableCell>
+                    <TableCell className="whitespace-nowrap">{item.projectCount}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
