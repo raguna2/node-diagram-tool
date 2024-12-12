@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { sampleData } from "@/lib/sampleData";
+import { sampleTableData } from "@/lib/sampleTableData";
+import { findRelatedTable, getRelatedTableData } from "@/lib/tableRelations";
 import * as d3 from "d3-force";
 import { Tooltip } from 'react-tooltip';
 import Header from "@/components/Header";
@@ -65,6 +67,25 @@ export default function ForceGraphEditor({
     setSelectedRowData(null); // ノードを切り替えた時は選択をリセット
     zoomToNode(node);
   }, [zoomToNode]);
+
+  const handleRowSelect = useCallback((data: Record<string, any>, tableName: string) => {
+    setSelectedRowData(data);
+    
+    // 関連するテーブルのノードを探す
+    const relation = findRelatedTable(tableName);
+    if (relation) {
+      const relatedData = getRelatedTableData(tableName, data, sampleTableData);
+      if (relatedData) {
+        const relatedTableName = relation.sourceTable === tableName ? relation.targetTable : relation.sourceTable;
+        const relatedNode = graphData.nodes.find(n => n.table === relatedTableName);
+        if (relatedNode) {
+          setSelectedNode(relatedNode);
+          setSelectedRowData(relatedData);
+          zoomToNode(relatedNode);
+        }
+      }
+    }
+  }, [graphData.nodes, zoomToNode]);
 
   // 選択されたノードの接続先ノードを取得
   const connectedNodes = useMemo(() => {
@@ -424,7 +445,7 @@ export default function ForceGraphEditor({
               </h3>
               <DataPreview 
                 tableName={selectedNode?.table} 
-                onRowSelect={setSelectedRowData}
+                onRowSelect={handleRowSelect}
                 selectedRowData={selectedRowData}
               />
             </div>
