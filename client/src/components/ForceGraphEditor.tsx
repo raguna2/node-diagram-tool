@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { sampleData } from "@/lib/sampleData";
 import * as d3 from "d3-force";
-import { Tooltip } from 'react-tooltip';
 import Header from "@/components/Header";
 import { getSchemaContent } from "@/components/TableSchema";
 import TableListSidebar from "@/components/TableListSidebar";
@@ -301,9 +300,9 @@ export default function ForceGraphEditor({
     if (globalScale >= 1 && node.table) {
       const schemaContent = getSchemaContent(node.table);
       if (schemaContent) {
-        // Calculate position for the modal
-        const modalX = node.x + nodeRadius * 2;
-        const modalY = node.y - nodeRadius * 2;
+        // Calculate position for the modal to be centered on the node
+        const modalX = node.x;
+        const modalY = node.y;
         
         // Save the position and content for the modal
         node.tooltip = {
@@ -461,13 +460,14 @@ export default function ForceGraphEditor({
       <Header />
       {hoveredNode?.tooltip && (
         <div
-          className="fixed z-50 p-4 rounded-lg shadow-lg"
+          className="fixed z-50 p-4 rounded-lg shadow-lg transform -translate-x-1/2 -translate-y-1/2"
           style={{
             left: hoveredNode.tooltip.x,
             top: hoveredNode.tooltip.y,
-            backgroundColor: 'rgba(44, 44, 44, 0.8)',
-            backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(71, 255, 222, 0.2)',
+            backgroundColor: 'rgba(44, 44, 44, 0.95)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(71, 255, 222, 0.3)',
+            minWidth: '200px',
           }}
         >
           {hoveredNode.tooltip.content}
