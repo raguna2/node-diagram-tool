@@ -7,6 +7,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { sampleTableData } from "@/lib/sampleTableData";
+import { findRelatedTable } from "@/lib/tableRelations";
 
 interface DataPreviewProps {
   tableName: string | undefined;
@@ -17,7 +18,19 @@ interface DataPreviewProps {
 export default function DataPreview({ tableName, onRowSelect, selectedRowData }: DataPreviewProps) {
   if (!tableName || !sampleTableData[tableName]) return null;
 
-  const data = sampleTableData[tableName];
+  // リレーションに基づいてデータを絞り込む
+  let data = sampleTableData[tableName];
+  if (selectedRowData) {
+    const relation = findRelatedTable(tableName);
+    if (relation) {
+      // 関連テーブルのデータを絞り込む
+      if (relation.sourceTable === tableName) {
+        data = data.filter(row => row[relation.sourceKey] === selectedRowData.id);
+      } else if (relation.targetTable === tableName) {
+        data = data.filter(row => row[relation.targetKey] === selectedRowData.id);
+      }
+    }
+  }
   const columns = Object.keys(data[0]);
 
   return (

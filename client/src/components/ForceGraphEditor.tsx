@@ -143,6 +143,8 @@ export default function ForceGraphEditor({
 
   const handleBack = useCallback(() => {
     setSelectedNode(null);
+    // selectedRowDataは保持する（クリアしない）
+    
     if (fgRef.current) {
       const fg = fgRef.current;
       // 即座にズームアウトを開始
@@ -184,8 +186,15 @@ export default function ForceGraphEditor({
   const paintNode = (node: NodeObject, ctx: CanvasRenderingContext2D) => {
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
-    // 選択されたノードがある場合、そのノード以外は描画しない
-    if (selectedNode && node.id !== selectedNode.id) return;
+    // リレーションを考慮したノードの描画判定
+    const relation = selectedRowData && findRelatedTable(node.table);
+    const isRelatedNode = relation && selectedRowData && (
+      (relation.sourceTable === node.table && selectedRowData.id === selectedRowData[relation.targetKey]) ||
+      (relation.targetTable === node.table && selectedRowData.id === selectedRowData[relation.sourceKey])
+    );
+
+    // 選択されたノードまたは関連ノード以外は描画しない
+    if (selectedNode && node.id !== selectedNode.id && !isRelatedNode) return;
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
