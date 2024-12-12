@@ -6,6 +6,7 @@ import { Tooltip } from 'react-tooltip';
 import Header from "@/components/Header";
 import TableSchema from "@/components/TableSchema";
 import TableListSidebar from "@/components/TableListSidebar";
+import AppSidebar from "@/components/AppSidebar";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataPreview from "@/components/DataPreview";
@@ -321,6 +322,7 @@ export default function ForceGraphEditor({
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex flex-1">
+        <AppSidebar />
         <TableListSidebar
           onTableSelect={(tableId) => {
             const node = graphData.nodes.find(n => n.id === tableId);
