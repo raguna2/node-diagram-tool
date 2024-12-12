@@ -20,10 +20,10 @@ export default function DataPreview({ tableName, onRowSelect, selectedRowData }:
 
   // リレーションに基づいてデータを絞り込む
   let data = sampleTableData[tableName];
-  if (selectedRowData) {
+  if (selectedRowData && tableName === selectedNode?.table) {
     const relation = findRelatedTable(tableName);
     if (relation) {
-      // 関連テーブルのデータを絞り込む
+      // ズームイン時のみ関連テーブルのデータを絞り込む
       if (relation.sourceTable === tableName) {
         data = data.filter(row => row[relation.sourceKey] === selectedRowData.id);
       } else if (relation.targetTable === tableName) {

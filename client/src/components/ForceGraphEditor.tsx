@@ -143,7 +143,26 @@ export default function ForceGraphEditor({
 
   const handleBack = useCallback(() => {
     setSelectedNode(null);
-    // selectedRowDataは保持する（クリアしない）
+    // selectedRowDataを保持したまま、ノード選択状態のみクリア
+    
+    // リレーションのあるノードを探して強調表示
+    if (selectedRowData) {
+      const currentTable = selectedNode?.table;
+      const relation = findRelatedTable(currentTable || '');
+      if (relation) {
+        const relatedNode = graphData.nodes.find(n => 
+          (relation.sourceTable === currentTable && n.table === relation.targetTable) ||
+          (relation.targetTable === currentTable && n.table === relation.sourceTable)
+        );
+        if (relatedNode) {
+          // リレーションノードの状態を更新
+          setSelectedRowData(prevData => ({
+            ...prevData,
+            relatedNodeId: relatedNode.id
+          }));
+        }
+      }
+    }
     
     if (fgRef.current) {
       const fg = fgRef.current;
@@ -187,14 +206,20 @@ export default function ForceGraphEditor({
     if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
     
     // リレーションを考慮したノードの描画判定
-    const relation = selectedRowData && findRelatedTable(node.table);
-    const isRelatedNode = relation && selectedRowData && (
-      (relation.sourceTable === node.table && selectedRowData.id === selectedRowData[relation.targetKey]) ||
-      (relation.targetTable === node.table && selectedRowData.id === selectedRowData[relation.sourceKey])
+    const relation = findRelatedTable(node.table);
+    const isRelatedNode = selectedRowData && relation && (
+      (relation.sourceTable === node.table && selectedRowData[relation.sourceKey]) ||
+      (relation.targetTable === node.table && selectedRowData[relation.targetKey])
     );
 
-    // 選択されたノードまたは関連ノード以外は描画しない
-    if (selectedNode && node.id !== selectedNode.id && !isRelatedNode) return;
+    // 選択されたノード、または選択データに関連するノードのみ描画
+    if (!selectedNode && !isRelatedNode) {
+      // ノード未選択時は全ノードを表示
+      ctx.globalAlpha = 0.3;
+    } else if (selectedNode && node.id !== selectedNode.id && !isRelatedNode) {
+      // 選択ノードまたは関連ノード以外は非表示
+      return;
+    }
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
