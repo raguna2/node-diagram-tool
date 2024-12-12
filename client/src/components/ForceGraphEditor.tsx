@@ -324,15 +324,17 @@ export default function ForceGraphEditor({
           <div className="flex flex-1">
             <div className="flex-1 bg-white relative">
               
-              <div className="absolute top-4 left-4 z-10">
-                <Button
-                  onClick={handleBack}
-                  variant="ghost"
-                  className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                >
-                  ← Back
-                </Button>
-              </div>
+              {selectedNode && (
+                <div className="absolute top-4 left-4 z-10">
+                  <Button
+                    onClick={handleBack}
+                    variant="ghost"
+                    className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                  >
+                    ← Back
+                  </Button>
+                </div>
+              )}
               {selectedNode && connectedNodes.length > 0 && (
                 <div className="absolute top-4 right-4 flex gap-2 z-10">
                   <Button
