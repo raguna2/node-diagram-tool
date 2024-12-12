@@ -53,7 +53,7 @@ export default function ForceGraphEditor({
     // 少し遅れて中央に移動しながらズームイン
     setTimeout(() => {
       fg.centerAt(nodeX, nodeY, 400);
-      fg.zoom(8, 400);
+      fg.zoom(6.4, 400);
     }, 50);
   }, []);
 
