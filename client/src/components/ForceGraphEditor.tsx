@@ -562,30 +562,26 @@ export default function ForceGraphEditor({
             </div>
             {/* スキーマ情報は削除し、ホバーで表示するように変更 */}
           </div>
-          <div 
-            className={`transition-all duration-300 ease-in-out ${
-              selectedNode ? 'h-[30vh]' : 'h-0'
-            } border-t border-[#47FFDE] bg-[#2C2C2C] overflow-hidden`}
-          >
-            <div className="p-4">
-              <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
-                データプレビュー: {selectedNode?.table}
-              </h3>
-              <DataPreview 
-                tableName={selectedNode?.table} 
-                onRowSelect={(data) => {
-                  if (selectedNode) {
+          {selectedNode && (
+            <div className="w-96 border-l border-[#47FFDE] bg-[#2C2C2C] overflow-hidden">
+              <div className="p-4">
+                <h3 className="text-lg font-medium text-[#BBBBBB] mb-4">
+                  データプレビュー: {selectedNode.table}
+                </h3>
+                <DataPreview 
+                  tableName={selectedNode.table} 
+                  onRowSelect={(data) => {
                     setSelectedRowDataMap(prev => {
                       const newMap = new Map(prev);
                       newMap.set(selectedNode.id, data);
                       return newMap;
                     });
-                  }
-                }}
-                selectedRowData={selectedNode ? selectedRowDataMap.get(selectedNode.id) : null}
-              />
+                  }}
+                  selectedRowData={selectedRowDataMap.get(selectedNode.id)}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
