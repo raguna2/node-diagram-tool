@@ -11,3 +11,35 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+[data-panel] {
+  display: flex;
+  gap: 2px;
+}
+
+[data-panel-group] {
+  display: flex;
+  overflow: hidden;
+}
+
+[data-panel-resizer] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #47FFDE;
+  opacity: 0.2;
+  transition: opacity 0.2s;
+  cursor: col-resize;
+}
+
+[data-panel-resizer]:hover {
+  opacity: 0.4;
+}
+
+[data-panel-resizer][data-resize-handle] {
+  width: 2px;
+}
+
+[data-panel-resizer][data-resize-handle-active] {
+  opacity: 0.4;
+}
