@@ -515,108 +515,117 @@ export default function ForceGraphEditor({
         <div className="flex flex-col flex-1">
           <div className="flex flex-1">
             <div className="flex bg-white relative">
-              <div className="relative">
-                {selectedNode && (
-                  <div className="absolute top-4 left-4 z-10">
-                    <Button
-                      onClick={handleBack}
-                      variant="ghost"
-                      className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                    >
-                      ← Back
-                    </Button>
-                  </div>
-                )}
-                {selectedNode && connectedNodes.length > 0 && (
-                  <div className="absolute top-4 right-4 flex gap-2 z-10">
-                    <Button
-                      onClick={handlePrev}
-                      variant="ghost"
-                      className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      onClick={handleNext}
-                      variant="ghost"
-                      className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
-                <ForceGraph2D
-                  ref={fgRef}
-                  graphData={graphData}
-                  nodeLabel="id"
-                  backgroundColor="#ffffff"
-                  onNodeClick={(node: CustomNodeObject) => {
-                    handleNodeClick(node);
+              <div className="w-1/2 flex">
+                <TableListSidebar
+                  onTableSelect={(tableId) => {
+                    const node = graphData.nodes.find(n => n.id === tableId);
+                    if (node) handleNodeClick(node);
                   }}
-                  onBackgroundClick={() => {
-                    setSelectedRowDataMap(new Map());
-                  }}
-                  nodeCanvasObject={paintNode}
-                  onNodeHover={(node: CustomNodeObject | null) => {
-                    setHoveredNode(node);
-                  }}
-                  nodePointerAreaPaint={(node: D3Node, color: string, ctx: CanvasRenderingContext2D) => {
-                    if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
-                    ctx.beginPath();
-                    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
-                    ctx.fillStyle = color;
-                    ctx.fill();
-                  }}
-                  linkCanvasObject={paintLink}
-                  linkColor={() => "transparent"}
-                  linkDirectionalArrowLength={0}
-                  width={window.innerWidth - (selectedNode ? window.innerWidth / 2 : 64)}
-                  height={window.innerHeight - 64}
-                  d3Force={(engine: any) => {
-                    engine
-                      .force('charge', d3.forceManyBody().strength(charge))
-                      .force('collide', d3.forceCollide(nodeRadius * 1.5))
-                      .force('link', d3.forceLink().distance(linkDistance))
-                      .force('center', d3.forceCenter());
-                  }}
-                  d3VelocityDecay={0.3}
-                  enableNodeDrag={true}
-                  enableZoomPanInteraction={true}
-                  onNodeDragEnd={(node: CustomNodeObject) => {
-                    node.fx = node.x;
-                    node.fy = node.y;
-                  }}
-                  autoPauseRedraw={false}
+                  selectedNode={selectedNode?.id}
                 />
-              </div>
-              
-              {selectedNode && (
-                <div className="w-1/2 border-l border-[#47FFDE] bg-[#2C2C2C]">
-                  <div className="p-4">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="text-lg font-medium text-[#BBBBBB]">
-                        データプレビュー: {selectedNode.table}
-                      </h3>
+                <div className="flex-1 relative">
+                  {selectedNode && (
+                    <div className="absolute top-4 left-4 z-10">
                       <Button
-                        onClick={() => setIsPreviewFullscreen(true)}
+                        onClick={handleBack}
                         variant="ghost"
-                        className="text-[#BBBBBB] hover:bg-[#3C3C3C]"
+                        className="text-sm bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
                       >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                        </svg>
+                        ← Back
                       </Button>
                     </div>
+                  )}
+                  {selectedNode && connectedNodes.length > 0 && (
+                    <div className="absolute top-4 right-4 flex gap-2 z-10">
+                      <Button
+                        onClick={handlePrev}
+                        variant="ghost"
+                        className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        onClick={handleNext}
+                        variant="ghost"
+                        className="bg-[#2C2C2C] text-[#BBBBBB] hover:bg-[#3C3C3C] transition-colors"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                  <ForceGraph2D
+                    ref={fgRef}
+                    graphData={graphData}
+                    nodeLabel="id"
+                    backgroundColor="#ffffff"
+                    onNodeClick={(node: CustomNodeObject) => {
+                      handleNodeClick(node);
+                    }}
+                    onBackgroundClick={() => {
+                      setSelectedRowDataMap(new Map());
+                    }}
+                    nodeCanvasObject={paintNode}
+                    onNodeHover={(node: CustomNodeObject | null) => {
+                      setHoveredNode(node);
+                    }}
+                    nodePointerAreaPaint={(node: D3Node, color: string, ctx: CanvasRenderingContext2D) => {
+                      if (typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+                      ctx.beginPath();
+                      ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                      ctx.fillStyle = color;
+                      ctx.fill();
+                    }}
+                    linkCanvasObject={paintLink}
+                    linkColor={() => "transparent"}
+                    linkDirectionalArrowLength={0}
+                    width={window.innerWidth / 2 - 64}
+                    height={window.innerHeight - 64}
+                    d3Force={(engine: any) => {
+                      engine
+                        .force('charge', d3.forceManyBody().strength(charge))
+                        .force('collide', d3.forceCollide(nodeRadius * 1.5))
+                        .force('link', d3.forceLink().distance(linkDistance))
+                        .force('center', d3.forceCenter());
+                    }}
+                    d3VelocityDecay={0.3}
+                    enableNodeDrag={true}
+                    enableZoomPanInteraction={true}
+                    onNodeDragEnd={(node: CustomNodeObject) => {
+                      node.fx = node.x;
+                      node.fy = node.y;
+                    }}
+                    autoPauseRedraw={false}
+                  />
+                </div>
+              </div>
+              
+              <div className="w-1/2 border-l border-[#47FFDE] bg-[#2C2C2C]">
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium text-[#BBBBBB]">
+                      データプレビュー: {selectedNode?.table || ''}
+                    </h3>
+                    <Button
+                      onClick={() => setIsPreviewFullscreen(true)}
+                      variant="ghost"
+                      className="text-[#BBBBBB] hover:bg-[#3C3C3C]"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                      </svg>
+                    </Button>
+                  </div>
+                  {selectedNode && (
                     <DataPreview 
                       tableName={selectedNode.table} 
                       onRowSelect={(data) => {
@@ -628,9 +637,9 @@ export default function ForceGraphEditor({
                       }}
                       selectedRowData={selectedRowDataMap.get(selectedNode.id)}
                     />
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
