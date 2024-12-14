@@ -67,14 +67,14 @@ export default function ForceGraphEditor({
     const rowCount = rowData.length;
     
     // 基本サイズ
-    const baseRadius = 12;
+    const baseRadius = 10;
     
     // カラム数とデータ量に基づいてサイズを計算
-    const columnFactor = Math.log(columnCount + 1) * 1.2;
-    const rowFactor = Math.log(rowCount + 1) * 0.8;
+    const columnFactor = Math.log(columnCount + 1) * 1.5;  // カラム数の影響を強く
+    const rowFactor = Math.log(rowCount + 1) * 1.2;       // データ量の影響も強く
     
-    // 最終的なサイズを計算（最小12px、最大24px）
-    return Math.min(Math.max(baseRadius * (columnFactor + rowFactor) / 2, 12), 24);
+    // 最終的なサイズを計算（最小10px、最大30px）でより大きな差を出す
+    return Math.min(Math.max(baseRadius * (columnFactor + rowFactor) / 2, 10), 30);
   };
   const [selectedNode, setSelectedNode] = useState<CustomNodeObject | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
