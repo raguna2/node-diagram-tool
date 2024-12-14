@@ -35,21 +35,15 @@ interface CustomNodeObject {
 }
 
 interface CustomLinkObject {
-  source: CustomNodeObject | string;
-  target: CustomNodeObject | string;
+  source: CustomNodeObject;
+  target: CustomNodeObject;
   relationship: string;
   value: number;
 }
 
-interface ForceGraphData {
-  nodes: Array<CustomNodeObject & {
-    __indexColor?: string;
-    __threeObj?: THREE.Mesh;
-  }>;
-  links: Array<CustomLinkObject & {
-    __lineObj?: THREE.Line;
-    __arrowObj?: THREE.Mesh;
-  }>;
+interface GraphData {
+  nodes: CustomNodeObject[];
+  links: CustomLinkObject[];
 }
 
 export default function ForceGraphEditor({
@@ -120,7 +114,7 @@ export default function ForceGraphEditor({
   const [selectedNode, setSelectedNode] = useState<CustomNodeObject | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
   const [selectedRowDataMap, setSelectedRowDataMap] = useState<Map<string, Record<string, any>>>(new Map());
-  const [graphData, setGraphData] = useState<ForceGraphData>(sampleData);
+  const [graphData, setGraphData] = useState(sampleData);
   const [hoveredNode, setHoveredNode] = useState<CustomNodeObject | null>(null);
   const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(1);
@@ -138,14 +132,13 @@ export default function ForceGraphEditor({
     const isSelected = selectedNode?.id === node.id;
     const hasBeenSelected = selectedNodes.has(node.id);
     
-    // 選択状態に応じた描画
     if (currentZoom > 2 && !isSelected && selectedNode) return;
 
-    // グロー効果
-    const time = performance.now() / 1000;
-    const pulseSize = 1 + Math.sin(time * 2) * 0.1;
+    ctx.save();
 
     if (isSelected || hasBeenSelected) {
+      const time = performance.now() / 1000;
+      const pulseSize = 1 + Math.sin(time * 2) * 0.1;
       const glow = ctx.createRadialGradient(
         node.x, node.y, radius * 1.5,
         node.x, node.y, radius * 3 * pulseSize
@@ -159,7 +152,6 @@ export default function ForceGraphEditor({
       ctx.fill();
     }
 
-    // ノード本体の描画
     const gradient = ctx.createRadialGradient(
       node.x - radius * 0.3,
       node.y - radius * 0.3,
@@ -179,15 +171,9 @@ export default function ForceGraphEditor({
     ctx.lineWidth = 0.75;
     ctx.stroke();
 
-    // アイコンとラベルの描画
     const iconSize = radius * 1.4;
-    const icon = new Image();
-    icon.src = `data:image/svg+xml,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#031F68" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3" fill="#e2e8f0"></ellipse><path d="M3 5V19C3 20.7 7 22 12 22S21 20.7 21 19V5" fill="#e2e8f0"></path><path d="M3 12C3 13.7 7 15 12 15S21 13.7 21 12"></path></svg>'
-    )}`;
-    
     ctx.drawImage(
-      icon,
+      new Image(),
       node.x - iconSize / 2,
       node.y - iconSize / 2,
       iconSize,
@@ -199,17 +185,12 @@ export default function ForceGraphEditor({
     ctx.textAlign = 'center';
     ctx.fillText(node.table || '', node.x, node.y + radius * 2);
 
-    // ツールチップの更新
-    if (globalScale >= 2.5 && node.table) {
-      const rowData = selectedRowDataMap.get(node.id);
-      const content = getSchemaContent(node.table, rowData);
-      if (content) {
-        node.tooltip = { content };
-      }
-    } else {
-      node.tooltip = undefined;
-    }
-  }, [selectedNode, selectedNodes, selectedRowDataMap, currentZoom, getNodeRadius]);
+    ctx.restore();
+
+    node.tooltip = globalScale >= 2.5 && node.table
+      ? { content: getSchemaContent(node.table, selectedRowDataMap.get(node.id)) }
+      : undefined;
+  }, [selectedNode?.id, selectedNodes, selectedRowDataMap, currentZoom, getNodeRadius]);
 
   // リンクの描画処理
   const paintLink = useCallback((link: CustomLinkObject, ctx: CanvasRenderingContext2D) => {
