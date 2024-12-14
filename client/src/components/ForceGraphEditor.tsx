@@ -56,12 +56,13 @@ export default function ForceGraphEditor({
   const fgRef = useRef<any>();
   const getNodeRadius = (node: CustomNodeObject) => {
     // スキーマ情報からカラム数を取得
-    const schemaContent = getSchemaContent(node.table);
-    const columnCount = schemaContent?.props.children[1].props.children.props.children.length || 0;
+    const schemaContent = getSchemaContent(node.table, null);
+    const columnCount = schemaContent?.props.children[1].props.children.length || 0;
     
     // サンプルデータから行数を取得
-    const tableData = sampleTableData[node.table] || [];
-    const rowCount = tableData.length;
+    const tableData = sampleData.nodes.find(n => n.id === node.id)?.table || '';
+    const rowData = sampleTableData[tableData] || [];
+    const rowCount = rowData.length;
     
     // 基本サイズ
     const baseRadius = 12;
