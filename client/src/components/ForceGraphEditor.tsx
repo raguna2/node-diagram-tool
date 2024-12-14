@@ -575,11 +575,37 @@ export default function ForceGraphEditor({
               width={window.innerWidth * 0.25}
               height={window.innerHeight - 64}
               d3Force={(engine: any) => {
+                const minDistance = 100;  // 最小距離
+                const maxDistance = 300;  // 最大距離
+                const optimalDistance = 200;  // 最適な距離
+
                 engine
-                  .force('charge', d3.forceManyBody().strength(charge))
-                  .force('collide', d3.forceCollide(nodeRadius * 1.5))
-                  .force('link', d3.forceLink().distance(linkDistance))
-                  .force('center', d3.forceCenter());
+                  .force('charge', d3.forceManyBody().strength(charge).distanceMax(maxDistance).distanceMin(minDistance))
+                  .force('collide', d3.forceCollide(nodeRadius * 2).strength(0.7))
+                  .force('link', d3.forceLink().distance(linkDistance).strength(1))
+                  .force('center', d3.forceCenter())
+                  // カスタム力を追加して、ノード間の距離を調整
+                  .force('spacing', d3.forceRadial(optimalDistance).strength(0.3));
+
+                // 既存のノード間の距離をチェックして調整
+                const nodes = engine.nodes();
+                for (let i = 0; i < nodes.length; i++) {
+                  for (let j = i + 1; j < nodes.length; j++) {
+                    const dx = nodes[j].x - nodes[i].x;
+                    const dy = nodes[j].y - nodes[i].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < minDistance) {
+                      const scale = minDistance / distance;
+                      nodes[j].x = nodes[i].x + dx * scale;
+                      nodes[j].y = nodes[i].y + dy * scale;
+                    } else if (distance > maxDistance) {
+                      const scale = maxDistance / distance;
+                      nodes[j].x = nodes[i].x + dx * scale;
+                      nodes[j].y = nodes[i].y + dy * scale;
+                    }
+                  }
+                }
               }}
               d3VelocityDecay={0.3}
               enableNodeDrag={true}
