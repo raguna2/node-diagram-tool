@@ -56,7 +56,6 @@ export default function ForceGraphEditor({
   isAutoRotate = false,
 }: ForceGraphProps) {
   const fgRef = useRef<any>();
-  const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth * 0.25,
     height: window.innerHeight - 64
@@ -251,8 +250,8 @@ export default function ForceGraphEditor({
   }, []);
 
   
-  const paintNode = (node: CustomNodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
-    if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+  const paintNode = useCallback((node: CustomNodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
+    if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return null;
     
     const isCurrentSelected = selectedNode && node.id === selectedNode.id;
     const isEverSelected = selectedNodes.has(node.id);
@@ -260,7 +259,7 @@ export default function ForceGraphEditor({
     const isZoomedIn = currentZoom > 2;
 
     // ズームイン時のみ、選択されていないノードを非表示に
-    if (isZoomedIn && !isCurrentSelected && selectedNode) return;
+    if (isZoomedIn && !isCurrentSelected && selectedNode) return null;
 
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
@@ -351,22 +350,22 @@ export default function ForceGraphEditor({
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
 
-    // Create a div for schema info only when zoomed in enough
+    // Create tooltip content without modifying state
     if (globalScale >= 2.5 && node.table) {
       // Get selected row data for this node
       const rowData = selectedRowDataMap.get(node.id);
       const schemaContent = getSchemaContent(node.table, rowData);
       if (schemaContent) {
-        // Save the schema content for the modal
-        node.tooltip = {
-          content: schemaContent
+        return {
+          node,
+          tooltip: {
+            content: schemaContent
+          }
         };
       }
-    } else {
-      // Clear tooltip when zoomed out
-      node.tooltip = undefined;
     }
-  };
+    return null;
+  }, [selectedNode, selectedNodes, selectedRowDataMap, getNodeRadius]);
 
   const paintLink = (link: CustomLinkObject, ctx: CanvasRenderingContext2D) => {
       const sourceNode = typeof link.source === 'string' ? graphData.nodes.find(n => n.id === link.source) : link.source;
@@ -615,7 +614,13 @@ export default function ForceGraphEditor({
                 setSelectedRowDataMap(new Map());
               }}
               nodeCanvasObject={paintNode}
-              onNodeHover={setHoveredNode}
+              onNodeHover={useCallback((node: CustomNodeObject | null) => {
+                if (node?.tooltip) {
+                  setHoveredNode(node);
+                } else {
+                  setHoveredNode(null);
+                }
+              }, [])}
               nodePointerAreaPaint={(node, color, ctx) => {
                 if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
                 const radius = getNodeRadius(node);
