@@ -575,37 +575,81 @@ export default function ForceGraphEditor({
               width={window.innerWidth * 0.25}
               height={window.innerHeight - 64}
               d3Force={(engine: any) => {
-                const minDistance = 100;  // 最小距離
-                const maxDistance = 300;  // 最大距離
-                const optimalDistance = 200;  // 最適な距離
+                const minDistance = 150;  // 最小距離を増加
+                const maxDistance = 400;  // 最大距離を増加
+                const optimalDistance = 250;  // 最適な距離を調整
 
-                engine
-                  .force('charge', d3.forceManyBody().strength(charge).distanceMax(maxDistance).distanceMin(minDistance))
-                  .force('collide', d3.forceCollide(nodeRadius * 2).strength(0.7))
-                  .force('link', d3.forceLink().distance(linkDistance).strength(1))
-                  .force('center', d3.forceCenter())
-                  // カスタム力を追加して、ノード間の距離を調整
-                  .force('spacing', d3.forceRadial(optimalDistance).strength(0.3));
+                // 反発力を強化
+                const charge = d3.forceManyBody()
+                  .strength(-200)  // 反発力を強く
+                  .distanceMin(minDistance)
+                  .distanceMax(maxDistance);
 
-                // 既存のノード間の距離をチェックして調整
-                const nodes = engine.nodes();
-                for (let i = 0; i < nodes.length; i++) {
-                  for (let j = i + 1; j < nodes.length; j++) {
-                    const dx = nodes[j].x - nodes[i].x;
-                    const dy = nodes[j].y - nodes[i].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < minDistance) {
-                      const scale = minDistance / distance;
-                      nodes[j].x = nodes[i].x + dx * scale;
-                      nodes[j].y = nodes[i].y + dy * scale;
-                    } else if (distance > maxDistance) {
-                      const scale = maxDistance / distance;
-                      nodes[j].x = nodes[i].x + dx * scale;
-                      nodes[j].y = nodes[i].y + dy * scale;
+                // リンクの力を強化
+                const link = d3.forceLink()
+                  .distance(d => {
+                    // リンクごとに距離を動的に調整
+                    const sourceLinks = engine.nodes().filter((n: any) => 
+                      engine.links().some((l: any) => l.source === d.source || l.target === d.source)
+                    ).length;
+                    const targetLinks = engine.nodes().filter((n: any) => 
+                      engine.links().some((l: any) => l.source === d.target || l.target === d.target)
+                    ).length;
+                    // リンク数に応じて距離を調整
+                    return optimalDistance * (1 + Math.min(sourceLinks, targetLinks) * 0.2);
+                  })
+                  .strength(2);  // リンクの力を強く
+
+                // 衝突検出を強化
+                const collide = d3.forceCollide()
+                  .radius(nodeRadius * 3)  // 衝突半径を増加
+                  .strength(0.9)  // 衝突の力を強く
+                  .iterations(3);  // 反復回数を増加
+
+                // カスタム力を追加
+                const customForce = (alpha: number) => {
+                  const nodes = engine.nodes();
+                  for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                      const node1 = nodes[i];
+                      const node2 = nodes[j];
+                      const dx = node2.x - node1.x;
+                      const dy = node2.y - node1.y;
+                      const distance = Math.sqrt(dx * dx + dy * dy);
+                      
+                      if (distance === 0) continue;
+                      
+                      // 力の強さを計算
+                      let strength = 0;
+                      if (distance < minDistance) {
+                        // 近すぎる場合は強い反発力
+                        strength = (minDistance - distance) / distance * alpha * 2;
+                      } else if (distance > maxDistance) {
+                        // 遠すぎる場合は引力
+                        strength = (maxDistance - distance) / distance * alpha;
+                      }
+                      
+                      // 力を適用
+                      const fx = dx * strength;
+                      const fy = dy * strength;
+                      
+                      node1.vx -= fx;
+                      node1.vy -= fy;
+                      node2.vx += fx;
+                      node2.vy += fy;
                     }
                   }
-                }
+                };
+
+                engine
+                  .force('charge', charge)
+                  .force('link', link)
+                  .force('collide', collide)
+                  .force('center', d3.forceCenter())
+                  .force('custom', customForce)
+                  .velocityDecay(0.4)  // 移動の減衰を調整
+                  .alphaMin(0.001)  // シミュレーションの終了条件を調整
+                  .alphaDecay(0.02);  // シミュレーションの収束速度を調整
               }}
               d3VelocityDecay={0.3}
               enableNodeDrag={true}
