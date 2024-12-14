@@ -56,6 +56,32 @@ export default function ForceGraphEditor({
   isAutoRotate = false,
 }: ForceGraphProps) {
   const fgRef = useRef<any>();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({
+    width: window.innerWidth * 0.25,
+    height: window.innerHeight - 64
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        setDimensions({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight
+        });
+        // Force graph update
+        if (fgRef.current) {
+          fgRef.current.d3ReheatSimulation();
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    // Initial size
+    handleResize();
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const getNodeRadius = (node: CustomNodeObject) => {
     // スキーマ情報からカラム数を取得
     const schemaContent = getSchemaContent(node.table, null);
@@ -549,7 +575,7 @@ export default function ForceGraphEditor({
         {/* Main content area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Force graph area */}
-          <div className="w-1/3 relative overflow-hidden">
+          <div ref={containerRef} className="w-1/3 relative overflow-hidden">
             {selectedNode && (
               <div className="absolute top-4 left-4 z-10">
                 <Button
@@ -601,8 +627,8 @@ export default function ForceGraphEditor({
               linkCanvasObject={paintLink}
               linkColor={() => "transparent"}
               linkDirectionalArrowLength={0}
-              width={window.innerWidth * 0.25}
-              height={window.innerHeight - 64}
+              width={fgRef.current?.offsetWidth || window.innerWidth * 0.25}
+              height={fgRef.current?.offsetHeight || window.innerHeight - 64}
               d3Force={(engine: any) => {
                 const minDistance = 250;  // 最小距離をさらに増加
                 const maxDistance = 600;  // 最大距離を増加
