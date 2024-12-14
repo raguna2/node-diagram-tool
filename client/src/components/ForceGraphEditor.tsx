@@ -575,13 +575,13 @@ export default function ForceGraphEditor({
               width={window.innerWidth * 0.25}
               height={window.innerHeight - 64}
               d3Force={(engine: any) => {
-                const minDistance = 150;  // 最小距離を増加
-                const maxDistance = 400;  // 最大距離を増加
-                const optimalDistance = 250;  // 最適な距離を調整
+                const minDistance = 250;  // 最小距離をさらに増加
+                const maxDistance = 600;  // 最大距離を増加
+                const optimalDistance = 400;  // 最適な距離を調整
 
                 // 反発力を強化
                 const charge = d3.forceManyBody()
-                  .strength(-200)  // 反発力を強く
+                  .strength(-300)  // 反発力をさらに強く
                   .distanceMin(minDistance)
                   .distanceMax(maxDistance);
 
@@ -602,9 +602,9 @@ export default function ForceGraphEditor({
 
                 // 衝突検出を強化
                 const collide = d3.forceCollide()
-                  .radius(nodeRadius * 3)  // 衝突半径を増加
-                  .strength(0.9)  // 衝突の力を強く
-                  .iterations(3);  // 反復回数を増加
+                  .radius(nodeRadius * 5)  // 衝突半径をさらに増加
+                  .strength(1)    // 衝突の力を最大に
+                  .iterations(4);  // 反復回数を増加
 
                 // カスタム力を追加
                 const customForce = (alpha: number) => {
