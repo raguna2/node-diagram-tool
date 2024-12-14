@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { sampleData } from "@/lib/sampleData";
+import { sampleTableData } from "@/lib/sampleTableData";
 import * as d3 from "d3-force";
 import Header from "@/components/Header";
 import { getSchemaContent } from "@/components/TableSchema";
@@ -8,6 +9,7 @@ import TableListSidebar from "@/components/TableListSidebar";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataPreview from "@/components/DataPreview";
+import * as THREE from "three";
 
 interface ForceGraphProps {
   charge?: number;
@@ -57,10 +59,10 @@ export default function ForceGraphEditor({
   const getNodeRadius = (node: CustomNodeObject) => {
     // スキーマ情報からカラム数を取得
     const schemaContent = getSchemaContent(node.table, null);
-    const columnCount = schemaContent?.props.children[1].props.children.length || 0;
+    const columnCount = schemaContent?.props?.children[1]?.props?.children?.length || 0;
     
     // サンプルデータから行数を取得
-    const tableData = sampleData.nodes.find(n => n.id === node.id)?.table || '';
+    const tableData = node.table;
     const rowData = sampleTableData[tableData] || [];
     const rowCount = rowData.length;
     
@@ -350,7 +352,7 @@ export default function ForceGraphEditor({
     const isZoomedIn = currentZoom > 2;
 
     // ズームイン時は選択されたノードに関連するエッジのみ表示
-    if (isZoomedIn && selectedNode && source.id !== selectedNode.id && target.id !== selectedNode.id) {
+    if (isZoomedIn && selectedNode && sourceNode.id !== selectedNode.id && targetNode.id !== selectedNode.id) {
       return;
     }
     
@@ -371,7 +373,7 @@ export default function ForceGraphEditor({
     const cpY = midY + dx * curvature;
     
     // Create gradient with relationship-specific colors
-    const gradient = ctx.createLinearGradient(source.x, source.y, target.x, target.y);
+    const gradient = ctx.createLinearGradient(sourceNode.x, sourceNode.y, targetNode.x, targetNode.y);
     let startColor, endColor;
     
     switch (link.relationship) {
@@ -397,8 +399,8 @@ export default function ForceGraphEditor({
     
     // Draw curved path
     ctx.beginPath();
-    ctx.moveTo(source.x, source.y);
-    ctx.quadraticCurveTo(cpX, cpY, target.x, target.y);
+    ctx.moveTo(sourceNode.x, sourceNode.y);
+    ctx.quadraticCurveTo(cpX, cpY, targetNode.x, targetNode.y);
     
     // Set line style based on relationship
     switch (link.relationship) {
@@ -443,8 +445,8 @@ export default function ForceGraphEditor({
       
       if (link.relationship === "one-to-many") {
         // Draw arrow at target
-        const arrowX = target.x - Math.cos(angle) * 20;
-        const arrowY = target.y - Math.sin(angle) * 20;
+        const arrowX = targetNode.x - Math.cos(angle) * 20;
+        const arrowY = targetNode.y - Math.sin(angle) * 20;
         
         ctx.beginPath();
         ctx.moveTo(
@@ -461,16 +463,16 @@ export default function ForceGraphEditor({
         // Draw circles at both ends
         ctx.beginPath();
         ctx.arc(
-          source.x + Math.cos(angle) * 15,
-          source.y + Math.sin(angle) * 15,
+          sourceNode.x + Math.cos(angle) * 15,
+          sourceNode.y + Math.sin(angle) * 15,
           3, 0, 2 * Math.PI
         );
         ctx.fill();
         
         ctx.beginPath();
         ctx.arc(
-          target.x - Math.cos(angle) * 15,
-          target.y - Math.sin(angle) * 15,
+          targetNode.x - Math.cos(angle) * 15,
+          targetNode.y - Math.sin(angle) * 15,
           3, 0, 2 * Math.PI
         );
         ctx.fill();
