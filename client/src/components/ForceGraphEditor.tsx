@@ -56,6 +56,7 @@ export default function ForceGraphEditor({
   isAutoRotate = false,
 }: ForceGraphProps) {
   const fgRef = useRef<any>();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({
     width: window.innerWidth * 0.25,
     height: window.innerHeight - 64
@@ -64,10 +65,11 @@ export default function ForceGraphEditor({
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
-        setDimensions({
+        const newDimensions = {
           width: containerRef.current.offsetWidth,
           height: containerRef.current.offsetHeight
-        });
+        };
+        setDimensions(newDimensions);
         // Force graph update
         if (fgRef.current) {
           fgRef.current.d3ReheatSimulation();
@@ -250,6 +252,14 @@ export default function ForceGraphEditor({
   }, []);
 
   
+  const handleNodeHover = useCallback((node: CustomNodeObject | null) => {
+    if (node?.tooltip) {
+      setHoveredNode(node);
+    } else {
+      setHoveredNode(null);
+    }
+  }, []);
+
   const paintNode = useCallback((node: CustomNodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return null;
     
@@ -614,13 +624,7 @@ export default function ForceGraphEditor({
                 setSelectedRowDataMap(new Map());
               }}
               nodeCanvasObject={paintNode}
-              onNodeHover={useCallback((node: CustomNodeObject | null) => {
-                if (node?.tooltip) {
-                  setHoveredNode(node);
-                } else {
-                  setHoveredNode(null);
-                }
-              }, [])}
+              onNodeHover={handleNodeHover}
               nodePointerAreaPaint={(node, color, ctx) => {
                 if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
                 const radius = getNodeRadius(node);
