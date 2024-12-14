@@ -627,8 +627,8 @@ export default function ForceGraphEditor({
               linkCanvasObject={paintLink}
               linkColor={() => "transparent"}
               linkDirectionalArrowLength={0}
-              width={fgRef.current?.offsetWidth || window.innerWidth * 0.25}
-              height={fgRef.current?.offsetHeight || window.innerHeight - 64}
+              width={dimensions.width}
+              height={dimensions.height}
               d3Force={(engine: any) => {
                 const minDistance = 250;  // 最小距離をさらに増加
                 const maxDistance = 600;  // 最大距離を増加
