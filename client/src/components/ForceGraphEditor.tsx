@@ -762,7 +762,7 @@ export default function ForceGraphEditor({
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: "100%", opacity: 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className={`flex-1 border-l border-white/10 overflow-x-auto ${currentZoom > 2 ? 'bg-[#2C2C2C]/80 backdrop-blur-xl' : ''}`}
+                className="flex-1 border-l border-white/10 overflow-x-auto bg-[#2C2C2C]/80 backdrop-blur-xl"
               >
                 <div className="p-4">
                   <div className="flex justify-between items-center mb-4">
