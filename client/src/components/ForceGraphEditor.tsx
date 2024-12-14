@@ -37,10 +37,16 @@ interface CustomLinkObject {
   value: number;
 }
 
-type ForceGraphData = {
-  nodes: CustomNodeObject[];
-  links: CustomLinkObject[];
-};
+interface ForceGraphData {
+  nodes: Array<CustomNodeObject & {
+    __indexColor?: string;
+    __threeObj?: THREE.Mesh;
+  }>;
+  links: Array<CustomLinkObject & {
+    __lineObj?: THREE.Line;
+    __arrowObj?: THREE.Mesh;
+  }>;
+}
 
 export default function ForceGraphEditor({
   charge = -100,
@@ -48,7 +54,25 @@ export default function ForceGraphEditor({
   isAutoRotate = false,
 }: ForceGraphProps) {
   const fgRef = useRef<any>();
-  const nodeRadius = 12;
+  const getNodeRadius = (node: CustomNodeObject) => {
+    // スキーマ情報からカラム数を取得
+    const schemaContent = getSchemaContent(node.table);
+    const columnCount = schemaContent?.props.children[1].props.children.props.children.length || 0;
+    
+    // サンプルデータから行数を取得
+    const tableData = sampleTableData[node.table] || [];
+    const rowCount = tableData.length;
+    
+    // 基本サイズ
+    const baseRadius = 12;
+    
+    // カラム数とデータ量に基づいてサイズを計算
+    const columnFactor = Math.log(columnCount + 1) * 1.2;
+    const rowFactor = Math.log(rowCount + 1) * 0.8;
+    
+    // 最終的なサイズを計算（最小12px、最大24px）
+    return Math.min(Math.max(baseRadius * (columnFactor + rowFactor) / 2, 12), 24);
+  };
   const [selectedNode, setSelectedNode] = useState<CustomNodeObject | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
   const [selectedRowDataMap, setSelectedRowDataMap] = useState<Map<string, Record<string, any>>>(new Map());
@@ -193,8 +217,8 @@ export default function ForceGraphEditor({
   const [currentZoom, setCurrentZoom] = useState(1);
 
   // ズーム終了時にstateを更新
-  const handleZoomEnd = useCallback((zoom: number) => {
-    setCurrentZoom(zoom);
+  const handleZoomEnd = useCallback((transform: { k: number; x: number; y: number }) => {
+    setCurrentZoom(transform.k);
   }, []);
 
   
@@ -212,17 +236,18 @@ export default function ForceGraphEditor({
     // Draw enhanced glow effect
     const time = performance.now() / 1000;
     const pulseSize = 1 + Math.sin(time * 2) * 0.1; // Pulsating effect
+    const currentNodeRadius = getNodeRadius(node);
     
     // Outer glow for selected state
     if (isCurrentSelected || isEverSelected) {
       const outerGlow = ctx.createRadialGradient(
-        node.x, node.y, nodeRadius * 1.5,
-        node.x, node.y, nodeRadius * 3 * pulseSize
+        node.x, node.y, currentNodeRadius * 1.5,
+        node.x, node.y, currentNodeRadius * 3 * pulseSize
       );
       outerGlow.addColorStop(0, 'rgba(123, 97, 255, 0.2)');
       outerGlow.addColorStop(1, 'rgba(123, 97, 255, 0)');
       ctx.beginPath();
-      ctx.arc(node.x, node.y, nodeRadius * 3 * pulseSize, 0, 2 * Math.PI);
+      ctx.arc(node.x, node.y, currentNodeRadius * 3 * pulseSize, 0, 2 * Math.PI);
       ctx.fillStyle = outerGlow;
       ctx.fill();
 
@@ -232,7 +257,7 @@ export default function ForceGraphEditor({
         // Animated ring
         const ringSize = 1 + Math.sin(time * 3) * 0.05;
         ctx.beginPath();
-        ctx.arc(node.x, node.y, nodeRadius * 1.8 * ringSize, 0, 2 * Math.PI);
+        ctx.arc(node.x, node.y, currentNodeRadius * 1.8 * ringSize, 0, 2 * Math.PI);
         ctx.strokeStyle = '#7B61FF';
         ctx.lineWidth = 2;
         ctx.stroke();
@@ -241,31 +266,32 @@ export default function ForceGraphEditor({
         ctx.font = 'bold 12px Arial';
         ctx.fillStyle = '#2C2C2C';
         ctx.textAlign = 'center';
-        ctx.fillText(`ID: ${nodeData.id}`, node.x, node.y - nodeRadius * 2.5);
+        ctx.fillText(`ID: ${nodeData.id}`, node.x, node.y - currentNodeRadius * 2.5);
       }
     }
 
     // Base glow
     const gradient = ctx.createRadialGradient(
-      node.x, node.y, nodeRadius * 0.5,
-      node.x, node.y, nodeRadius * 2
+      node.x, node.y, currentNodeRadius * 0.5,
+      node.x, node.y, currentNodeRadius * 2
     );
     gradient.addColorStop(0, 'rgba(3, 31, 104, 0.15)');
     gradient.addColorStop(1, 'rgba(3, 31, 104, 0)');
     ctx.beginPath();
-    ctx.arc(node.x, node.y, nodeRadius * 2, 0, 2 * Math.PI);
+    const radius = getNodeRadius(node);
+    ctx.arc(node.x, node.y, radius * 2, 0, 2 * Math.PI);
     ctx.fillStyle = gradient;
     ctx.fill();
 
     // Draw circle with gradient
     const circleGradient = ctx.createRadialGradient(
-      node.x - nodeRadius * 0.3, node.y - nodeRadius * 0.3, nodeRadius * 0.1,
-      node.x, node.y, nodeRadius * 1.2
+      node.x - currentNodeRadius * 0.3, node.y - currentNodeRadius * 0.3, currentNodeRadius * 0.1,
+      node.x, node.y, currentNodeRadius * 1.2
     );
     circleGradient.addColorStop(0, '#ffffff');
     circleGradient.addColorStop(1, '#f8fafc');
     ctx.beginPath();
-    ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+    ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
     ctx.fillStyle = circleGradient;
     ctx.fill();
     ctx.strokeStyle = "#64748b";
@@ -273,7 +299,7 @@ export default function ForceGraphEditor({
     ctx.stroke();
 
     // Draw database icon
-    const iconSize = nodeRadius * 1.4;
+    const iconSize = radius * 1.4;
     const icon = new Image();
     icon.src = `data:image/svg+xml,${encodeURIComponent(
       '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#031F68" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3" fill="#e2e8f0"></ellipse><path d="M3 5V19C3 20.7 7 22 12 22S21 20.7 21 19V5" fill="#e2e8f0"></path><path d="M3 12C3 13.7 7 15 12 15S21 13.7 21 12"></path></svg>'
@@ -292,7 +318,7 @@ export default function ForceGraphEditor({
     ctx.textAlign = 'center';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
     ctx.shadowBlur = 2;
-    ctx.fillText(node.table || '', node.x, node.y + nodeRadius * 3);
+    ctx.fillText(node.table || '', node.x, node.y + radius * 3);
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
 
@@ -314,11 +340,10 @@ export default function ForceGraphEditor({
   };
 
   const paintLink = (link: CustomLinkObject, ctx: CanvasRenderingContext2D) => {
-    const { source, target } = link;
-    if (!source || !target || typeof source.x === 'undefined' || typeof source.y === 'undefined' ||
-        typeof target.x === 'undefined' || typeof target.y === 'undefined') {
-      return;
-    }
+      const sourceNode = typeof link.source === 'string' ? graphData.nodes.find(n => n.id === link.source) : link.source;
+      const targetNode = typeof link.target === 'string' ? graphData.nodes.find(n => n.id === link.target) : link.target;
+      
+      if (!sourceNode?.x || !sourceNode?.y || !targetNode?.x || !targetNode?.y) return;
     
     const currentZoom = fgRef.current?.zoom() || 1;
     const isZoomedIn = currentZoom > 2;
@@ -333,13 +358,13 @@ export default function ForceGraphEditor({
     const dashOffset = time * 15; // Speed of animation
     
     // Calculate angle and distance for curved paths
-    const dx = target.x - source.x;
-    const dy = target.y - source.y;
+    const dx = targetNode.x - sourceNode.x;
+    const dy = targetNode.y - sourceNode.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
     
     // Create control points for curved path
-    const midX = (source.x + target.x) / 2;
-    const midY = (source.y + target.y) / 2;
+    const midX = (sourceNode.x + targetNode.x) / 2;
+    const midY = (sourceNode.y + targetNode.y) / 2;
     const curvature = 0.3;
     const cpX = midX - dy * curvature;
     const cpY = midY + dx * curvature;
@@ -564,8 +589,9 @@ export default function ForceGraphEditor({
               onNodeHover={setHoveredNode}
               nodePointerAreaPaint={(node, color, ctx) => {
                 if (!node || typeof node.x === 'undefined' || typeof node.y === 'undefined') return;
+                const radius = getNodeRadius(node);
                 ctx.beginPath();
-                ctx.arc(node.x, node.y, nodeRadius, 0, 2 * Math.PI);
+                ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
                 ctx.fillStyle = color;
                 ctx.fill();
               }}
@@ -602,7 +628,7 @@ export default function ForceGraphEditor({
 
                 // 衝突検出を強化
                 const collide = d3.forceCollide()
-                  .radius(nodeRadius * 5)  // 衝突半径をさらに増加
+                  .radius(getNodeRadius(node) * 5)  // 衝突半径をさらに増加
                   .strength(1)    // 衝突の力を最大に
                   .iterations(4);  // 反復回数を増加
 
