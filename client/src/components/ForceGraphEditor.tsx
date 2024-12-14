@@ -93,15 +93,30 @@ export default function ForceGraphEditor({
     const rowData = sampleTableData[tableData] || [];
     const rowCount = rowData.length;
     
-    // 基本サイズ
-    const baseRadius = 10;
+    // 基本サイズとスケール係数
+    const baseRadius = 12;
+    const maxRadius = 35;
+    const minRadius = 15;
     
-    // カラム数とデータ量に基づいてサイズを計算
-    const columnFactor = Math.log(columnCount + 1) * 1.5;  // カラム数の影響を強く
-    const rowFactor = Math.log(rowCount + 1) * 1.2;       // データ量の影響も強く
+    // データ量の重要度係数
+    const dataImportance = 0.6;
+    const schemaImportance = 0.4;
     
-    // 最終的なサイズを計算（最小10px、最大30px）でより大きな差を出す
-    return Math.min(Math.max(baseRadius * (columnFactor + rowFactor) / 2, 10), 30);
+    // カラム数とデータ量を正規化（対数スケール）
+    const normalizedColumns = Math.log2(columnCount + 2) / Math.log2(10); // 最大10カラムを想定
+    const normalizedRows = Math.log2(rowCount + 2) / Math.log2(100);     // 最大100行を想定
+    
+    // 重み付けされたスコアを計算
+    const score = (normalizedColumns * schemaImportance + normalizedRows * dataImportance);
+    
+    // スコアを半径に変換（エクスポネンシャルスケーリング）
+    const radius = minRadius + (maxRadius - minRadius) * Math.pow(score, 1.5);
+    
+    // アニメーションのための微細な変動を追加
+    const time = performance.now() / 1000;
+    const pulseFactor = 1 + Math.sin(time * 2) * 0.03;
+    
+    return Math.max(minRadius, Math.min(maxRadius, radius * pulseFactor));
   };
   const [selectedNode, setSelectedNode] = useState<CustomNodeObject | null>(null);
   const [selectedNodes, setSelectedNodes] = useState<Set<string>>(new Set());
