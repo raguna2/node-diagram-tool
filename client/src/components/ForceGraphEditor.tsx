@@ -10,6 +10,16 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import DataPreview from "@/components/DataPreview";
 import * as THREE from "three";
+import { motion, AnimatePresence } from "framer-motion";
+
+// Utility function for debouncing
+const debounce = (func: Function, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 interface ForceGraphProps {
   charge?: number;
@@ -745,47 +755,57 @@ export default function ForceGraphEditor({
           </div>
 
           {/* Data preview area */}
-          <div className="flex-1 border-l border-white/10 overflow-auto bg-[#2C2C2C]/80 backdrop-blur-xl">
-            <div className="p-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium bg-gradient-to-r from-[#47FFDE] to-[#7B61FF] bg-clip-text text-transparent">
-                  データプレビュー: {selectedNode?.table || ''}
-                </h3>
-                <Button
-                  onClick={() => setIsPreviewFullscreen(true)}
-                  variant="ghost"
-                  className="text-[#BBBBBB] hover:bg-[#3C3C3C]"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                  </svg>
-                </Button>
-              </div>
-              {selectedNode && (
-                <DataPreview 
-                  tableName={selectedNode.table} 
-                  onRowSelect={(data) => {
-                    setSelectedRowDataMap(prev => {
-                      const newMap = new Map(prev);
-                      newMap.set(selectedNode.id, data);
-                      return newMap;
-                    });
-                  }}
-                  selectedRowData={selectedRowDataMap.get(selectedNode.id)}
-                />
-              )}
-            </div>
-          </div>
+          <AnimatePresence>
+            {currentZoom > 2 && (
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="flex-1 border-l border-white/10 overflow-x-auto bg-[#2C2C2C]/80 backdrop-blur-xl"
+              >
+                <div className="p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-medium bg-gradient-to-r from-[#47FFDE] to-[#7B61FF] bg-clip-text text-transparent">
+                      データプレビュー: {selectedNode?.table || ''}
+                    </h3>
+                    <Button
+                      onClick={() => setIsPreviewFullscreen(true)}
+                      variant="ghost"
+                      className="text-[#BBBBBB] hover:bg-[#3C3C3C]"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                      </svg>
+                    </Button>
+                  </div>
+                  {selectedNode && (
+                    <DataPreview 
+                      tableName={selectedNode.table} 
+                      onRowSelect={(data) => {
+                        setSelectedRowDataMap(prev => {
+                          const newMap = new Map(prev);
+                          newMap.set(selectedNode.id, data);
+                          return newMap;
+                        });
+                      }}
+                      selectedRowData={selectedRowDataMap.get(selectedNode.id)}
+                    />
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
