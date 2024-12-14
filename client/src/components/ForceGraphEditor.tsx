@@ -609,10 +609,7 @@ export default function ForceGraphEditor({
         {/* Main content area */}
         <div className="flex flex-1 overflow-hidden">
           {/* Force graph area */}
-          <div 
-            ref={containerRef} 
-            className={`relative overflow-hidden ${currentZoom > 2 ? 'w-1/3' : 'w-full'}`}
-          >
+          <div ref={containerRef} className="w-1/3 relative overflow-hidden">
             {selectedNode && (
               <div className="absolute top-4 left-4 z-10">
                 <Button
@@ -765,11 +762,7 @@ export default function ForceGraphEditor({
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: "100%", opacity: 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className={`flex-1 border-l border-white/10 overflow-x-auto ${
-                  currentZoom > 2 
-                    ? 'bg-[#2C2C2C]/80 backdrop-blur-xl opacity-100 visible'
-                    : 'opacity-0 invisible w-0'
-                }`}
+                className={`flex-1 border-l border-white/10 overflow-x-auto ${currentZoom > 2 ? 'bg-[#2C2C2C]/80 backdrop-blur-xl' : ''}`}
               >
                 <div className="p-4">
                   <div className="flex justify-between items-center mb-4">
